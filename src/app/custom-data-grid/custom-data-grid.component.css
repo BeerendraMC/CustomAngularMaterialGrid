@@ -120,8 +120,3 @@ td.mat-cell a:active {
 :host ::ng-deep .dropdown-field.mat-form-field-appearance-legacy .mat-form-field-wrapper {
   padding-bottom: 0.92em;
 }
-
-:host ::ng-deep .dropdown-field .mat-form-field-infix {
-  min-width: 100px;
-  width: auto;
-}

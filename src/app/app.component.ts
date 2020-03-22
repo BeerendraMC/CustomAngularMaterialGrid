@@ -11,6 +11,8 @@ export class AppComponent implements OnInit {
   gridConfiguration: GridConfig[];
   displayedColumns: string[];
   Employees: IEmployee[];
+  selectedEmployee: IEmployee;
+  GenderChangeData: any;
 
   constructor(private _http: HttpClient) {}
 
@@ -42,11 +44,11 @@ export class AppComponent implements OnInit {
   }
 
   onNameClick(emp: IEmployee) {
-    console.log(emp);
+    this.selectedEmployee = emp;
   }
 
-  onGenderChange(event: any) {
-    console.log(event);
+  onGenderChange(data: any) {
+    this.GenderChangeData = data;
   }
 
 }
