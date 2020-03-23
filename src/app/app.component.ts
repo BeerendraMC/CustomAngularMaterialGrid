@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { GridConfig, ColumnType } from './custom-data-grid/custom-data-grid.component';
+import * as JsonData from '../../employeesData.json';
 
 @Component({
   selector: 'app-root',
@@ -10,13 +11,14 @@ import { GridConfig, ColumnType } from './custom-data-grid/custom-data-grid.comp
 export class AppComponent implements OnInit {
   gridConfiguration: GridConfig[];
   displayedColumns: string[];
-  Employees: IEmployee[];
+  Employees: IEmployee[] = (JsonData.employees as IEmployee[]);
   selectedEmployee: IEmployee;
   GenderChangeData: any;
 
   constructor(private _http: HttpClient) {}
 
   ngOnInit() {
+    this.Employees.forEach(e => e.dob = new Date(e.dob));
     this.gridConfiguration = [
       { name: 'id', label: 'Id', columnType: ColumnType.Text, sort: true },
       { name: 'name', label: 'Name', columnType: ColumnType.Link, sort: true },
@@ -28,20 +30,20 @@ export class AppComponent implements OnInit {
     ];
 
     this.displayedColumns = ['id', 'name', 'gender', 'phone', 'dob', 'email'];
-    this.getEmployees();
+    // this.getEmployees();
   }
 
-  getEmployees() {
-    this._http.get<IEmployee[]>('http://localhost:3000/employees').subscribe(
-      (data: IEmployee[]) => {
-        data.forEach(emp => emp.dob = new Date(emp.dob));
-        this.Employees = data;
-      },
-      err => {
-        console.error(err);
-      }
-    );
-  }
+  // getEmployees() {
+  //   this._http.get<IEmployee[]>('http://localhost:3000/employees').subscribe(
+  //     (data: IEmployee[]) => {
+  //       data.forEach(emp => emp.dob = new Date(emp.dob));
+  //       this.Employees = data;
+  //     },
+  //     err => {
+  //       console.error(err);
+  //     }
+  //   );
+  // }
 
   onNameClick(emp: IEmployee) {
     this.selectedEmployee = emp;
