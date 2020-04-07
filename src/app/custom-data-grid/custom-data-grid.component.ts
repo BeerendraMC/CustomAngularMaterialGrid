@@ -19,6 +19,7 @@ export class CustomDataGridComponent implements OnInit, OnChanges {
   @Input() pageSizeOptions?: number[] = [5, 10, 20];
   @Input() verticalScrollOffsetInRows?: number; /* No. of rows to introduce vertical scroll if the displayed no. of rows > this no. */
   @Input() searchOption?: { onColumn: string; searchTextBoxLabel: string; searchBoxStyle?: Object }; /* for global filter set onColumn: 'globalFilter' */
+  @Input() noDataMessage?: string = 'No data available.';
 
   @Output() OnLinkClick: EventEmitter<any> = new EventEmitter<any>();
   @Output() OnSelectionChange: EventEmitter<any> = new EventEmitter<any>();

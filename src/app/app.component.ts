@@ -35,7 +35,7 @@ export class AppComponent implements OnInit {
     this._http.get<IEmployee[]>('http://localhost:3000/employees').subscribe(
       (data: IEmployee[]) => {
         data.forEach(emp => emp.dob = new Date(emp.dob));
-        this.Employees = data;
+        setTimeout(() => { this.Employees = data; }, 2000);
       },
       err => {
         console.error(err);

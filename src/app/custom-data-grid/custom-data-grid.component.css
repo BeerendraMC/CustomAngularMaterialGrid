@@ -127,3 +127,10 @@ td.mat-cell a:active {
 :host ::ng-deep .mat-paginator-page-size-select {
   width: 40px;
 }
+
+.no-data-message,
+.loading-message {
+  text-align: center;
+  padding: 40px;
+  font-size: 20px;
+}
