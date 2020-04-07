@@ -134,3 +134,19 @@ td.mat-cell a:active {
   padding: 40px;
   font-size: 20px;
 }
+
+.th-right ::ng-deep .mat-sort-header-container {
+  justify-content: flex-end;
+}
+
+.td-right {
+  text-align: right;
+}
+
+.th-center ::ng-deep .mat-sort-header-container {
+  justify-content: center;
+}
+
+.td-center {
+  text-align: center;
+}

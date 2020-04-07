@@ -23,8 +23,8 @@ export class AppComponent implements OnInit {
       { name: 'gender', label: 'Gender', columnType: ColumnType.Dropdown, sort: true,
       dropdownValues: [{value: 'male', viewValue: 'Male'}, {value: 'female', viewValue: 'Female'}] },
       { name: 'phone', label: 'Phone', columnType: ColumnType.Text, sort: true },
-      { name: 'dob', label: 'DOB', columnType: ColumnType.Date, sort: true },
-      { name: 'email', label: 'Email', columnType: ColumnType.Text }
+      { name: 'dob', label: 'DOB', columnType: ColumnType.Date, sort: true, align: 'right' },
+      { name: 'email', label: 'Email', columnType: ColumnType.Text, align: 'center' }
     ];
 
     this.displayedColumns = ['id', 'name', 'gender', 'phone', 'dob', 'email'];

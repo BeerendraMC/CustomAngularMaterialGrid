@@ -99,4 +99,5 @@ export interface GridConfig {
   style?: Object;
   sort?: boolean;
   dropdownValues?: Array<{ value: any; viewValue: any }>;
+  align?: 'right' | 'center';
 }
