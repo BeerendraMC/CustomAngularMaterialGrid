@@ -130,7 +130,9 @@ td.mat-cell a:active {
 
 .no-data-message,
 .loading-message {
-  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   padding: 40px;
   font-size: 20px;
 }

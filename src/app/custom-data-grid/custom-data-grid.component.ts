@@ -99,5 +99,5 @@ export interface GridConfig {
   style?: Object;
   sort?: boolean;
   dropdownValues?: Array<{ value: any; viewValue: any }>;
-  align?: 'right' | 'center';
+  align?: 'right' | 'center'; /* left is the default alignment of mat-table */
 }
