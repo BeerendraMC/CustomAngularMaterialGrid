@@ -4,7 +4,7 @@
         <input matInput (keyup)="applyFilter($event)" autocomplete="off">
         <mat-icon matPrefix>search</mat-icon>
     </mat-form-field>
-    <div [ngStyle]="tableScrollStyle"> <!-- [ngStyle]="this.gridDataSource.paginator.pageSize > verticalScrollOffsetInRows && tableScrollStyle" -->
+    <div [ngStyle]="gridDataSource && gridDataSource.paginator.pageSize > verticalScrollOffsetInRows && tableScrollStyle"> <!-- [ngStyle]="tableScrollStyle" -->
         <table mat-table [dataSource]="gridDataSource" matSort>
             <ng-container *ngFor="let column of gridConfig" [matColumnDef]="column.name">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header [disabled]="!column.sort" [ngClass]="column.align ? 'th-'+column.align : ''">
