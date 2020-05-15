@@ -52,6 +52,13 @@ export class CustomDataGridComponent implements OnInit, OnChanges {
       this.gridDataSource = new MatTableDataSource(this.dataSource);
       this.gridDataSource.paginator = this.paginator;
       this.gridDataSource.sort = this.sort;
+      this.gridDataSource.sortingDataAccessor = (data: any, property: string) => {
+        if (typeof data[property] === 'string') {
+          return data[property].toLowerCase();
+        } else {
+          return data[property];
+        }
+      };
       if (this.searchOption && this.searchOption.onColumn !== 'globalFilter') {
         this.gridDataSource.filterPredicate = (data: any, filter: string) => {
           if (data[this.searchOption.onColumn] instanceof Date) {
@@ -98,6 +105,7 @@ export interface GridConfig {
   columnType: ColumnType;
   style?: Object;
   sort?: boolean;
+  disableClearSort?: boolean;
   dropdownValues?: Array<{ value: any; viewValue: any }>;
   align?: 'right' | 'center'; /* left is the default alignment of mat-table */
 }
