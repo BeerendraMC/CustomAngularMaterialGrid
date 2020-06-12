@@ -13,12 +13,14 @@ export class AppComponent implements OnInit {
   Employees: IEmployee[];
   selectedEmployee: IEmployee;
   GenderChangeData: any;
+  selectedRow: IEmployee;
+  defaultSelectedEmployee: IEmployee;
 
   constructor(private _http: HttpClient) {}
 
   ngOnInit() {
     this.gridConfiguration = [
-      { name: 'id', label: 'Id', columnType: ColumnType.Text, sort: true, style: {width: '10%'} },
+      { name: 'id', label: 'Id', columnType: ColumnType.Text, sort: true, },
       { name: 'name', label: 'Name', columnType: ColumnType.Link, sort: true, disableClearSort: true },
       { name: 'gender', label: 'Gender', columnType: ColumnType.Dropdown, sort: true,
       dropdownValues: [{value: 'male', viewValue: 'Male'}, {value: 'female', viewValue: 'Female'}] },
@@ -35,7 +37,10 @@ export class AppComponent implements OnInit {
     this._http.get<IEmployee[]>('http://localhost:3000/employees').subscribe(
       (data: IEmployee[]) => {
         data.forEach(emp => emp.dob = new Date(emp.dob));
-        setTimeout(() => { this.Employees = data; }, 2000);
+        setTimeout(() => {
+          this.Employees = data;
+          this.defaultSelectedEmployee = data.find(x => x.name === 'Sundar Pichai');
+        }, 2000);
       },
       err => {
         console.error(err);
@@ -45,6 +50,10 @@ export class AppComponent implements OnInit {
 
   onNameClick(emp: IEmployee) {
     this.selectedEmployee = emp;
+  }
+
+  onRowClick(emp: IEmployee) {
+    this.selectedRow = emp;
   }
 
   onGenderChange(data: any) {

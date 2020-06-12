@@ -19,16 +19,20 @@ export class CustomDataGridComponent implements OnInit, OnChanges {
   @Input() pageSizeOptions?: number[] = [5, 10, 20];
   @Input() verticalScrollOffsetInRows?: number; /* No. of rows to introduce vertical scroll if the displayed no. of rows > this no. */
   @Input() searchOption?: { onColumn: string; searchTextBoxLabel: string; searchBoxStyle?: Object }; /* for global filter set onColumn: 'globalFilter' */
-  @Input() noDataMessage?: string = 'No data available.';
+  @Input() noDataMessage = 'No data available.';
+  @Input() needRowClick = false;
+  @Input() defaultSelectedRow?: any;
 
   @Output() OnLinkClick: EventEmitter<any> = new EventEmitter<any>();
   @Output() OnSelectionChange: EventEmitter<any> = new EventEmitter<any>();
+  @Output() OnRowClick: EventEmitter<any> = new EventEmitter<any>();
 
   @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
   @ViewChild(MatSort, { static: true }) sort: MatSort;
 
   gridDataSource: MatTableDataSource<any>;
   tableScrollStyle: Object;
+  selectedRow: any;
 
   get ColumnType() { return ColumnType; }
 
@@ -69,6 +73,9 @@ export class CustomDataGridComponent implements OnInit, OnChanges {
           return data[this.searchOption.onColumn].toLowerCase().indexOf(filter) != -1;
         };
       }
+      if (this.needRowClick && this.defaultSelectedRow) {
+        this.selectedRow = this.defaultSelectedRow;
+      }
     }
   }
 
@@ -88,6 +95,13 @@ export class CustomDataGridComponent implements OnInit, OnChanges {
   emitSelectedElement(element: any, event: MatSelectChange) {
     const emitData = { element, selectedValue: event.value };
     this.OnSelectionChange.emit(emitData);
+  }
+
+  emitClickedRowElement(element: any) {
+    if (this.needRowClick) {
+      this.selectedRow = element;
+      this.OnRowClick.emit(element);
+    }
   }
 
 }

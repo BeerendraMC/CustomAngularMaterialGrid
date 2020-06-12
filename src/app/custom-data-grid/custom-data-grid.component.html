@@ -28,8 +28,9 @@
                 </td>
             </ng-container>
 
-            <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
-            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+            <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: gridDataSource?.paginator.pageSize > verticalScrollOffsetInRows"></tr>
+            <tr mat-row [ngStyle]="needRowClick && {'cursor': 'pointer'}" [ngClass]="{'selected-row': selectedRow === row}" 
+                *matRowDef="let row; columns: displayedColumns;" (click)="emitClickedRowElement(row)"></tr> <!--[attr.tabindex]="needRowClick ? 0 : ''"-->
         </table>
     </div>
     <div *ngIf="!dataSource" class="loading-message">
