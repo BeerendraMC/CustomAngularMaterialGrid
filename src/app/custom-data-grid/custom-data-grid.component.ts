@@ -110,7 +110,8 @@ export enum ColumnType {
   Text,
   Date,
   Link,
-  Dropdown
+  Dropdown,
+  Icon
 }
 
 export interface GridConfig {
@@ -122,4 +123,5 @@ export interface GridConfig {
   disableClearSort?: boolean;
   dropdownValues?: Array<{ value: any; viewValue: any }>;
   align?: 'right' | 'center'; /* left is the default alignment of mat-table */
+  ariaLabel?: string;
 }

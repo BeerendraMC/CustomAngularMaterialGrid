@@ -26,10 +26,11 @@ export class AppComponent implements OnInit {
       dropdownValues: [{value: 'male', viewValue: 'Male'}, {value: 'female', viewValue: 'Female'}] },
       { name: 'phone', label: 'Phone', columnType: ColumnType.Text, sort: true },
       { name: 'dob', label: 'DOB', columnType: ColumnType.Date, sort: true, align: 'right' },
-      { name: 'email', label: 'Email', columnType: ColumnType.Text, align: 'center' }
+      { name: 'email', label: 'Email', columnType: ColumnType.Text, align: 'center' },
+      { name: 'delete', label: 'Delete', columnType: ColumnType.Icon, align: 'center', ariaLabel: 'This button will delete this row' }
     ];
 
-    this.displayedColumns = ['id', 'name', 'gender', 'phone', 'dob', 'email'];
+    this.displayedColumns = ['id', 'name', 'gender', 'phone', 'dob', 'email', 'delete'];
     this.getEmployees();
   }
 
