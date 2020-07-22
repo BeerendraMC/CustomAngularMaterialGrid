@@ -7,12 +7,15 @@
     <div [ngStyle]="gridDataSource?.paginator.pageSize > verticalScrollOffsetInRows && tableScrollStyle"> <!-- [ngStyle]="tableScrollStyle" -->
         <table mat-table [dataSource]="gridDataSource" matSort>
             <ng-container *ngFor="let column of gridConfig" [matColumnDef]="column.name">
-                <th mat-header-cell *matHeaderCellDef mat-sort-header [disabled]="!column.sort" [disableClear]="column.disableClearSort" [ngClass]="column.align ? 'th-'+column.align : ''">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header [disabled]="!column.sort" disableClear [ngClass]="column.align ? 'th-'+column.align : ''">
                     {{ column.label }}
                 </th>
                 <td mat-cell *matCellDef="let element" [ngStyle]="column.style" [ngClass]="column.align ? 'td-'+column.align : ''">
-                    <span *ngIf="column.columnType === ColumnType.Date">{{ element[column.name] | date }}</span>
-                    <a *ngIf="column.columnType === ColumnType.Link" tabindex="0" (click)="emitClickedElement(element)" [attr.aria-label]="column.ariaLabel">
+                    <span *ngIf="column.columnType === ColumnType.Date" [ngClass]="{'padding-right': column.align === 'right' && column.sort}">
+                        {{ element[column.name] | date }}
+                    </span>
+                    <a *ngIf="column.columnType === ColumnType.Link" tabindex="0" (click)="emitClickedElement(element)"
+                        [ngClass]="{'padding-right': column.align === 'right' && column.sort}">
                         {{ element[column.name] }}
                     </a>
                     <mat-form-field class="dropdown-field" [ngStyle]="column.style" *ngIf="column.columnType === ColumnType.Dropdown">
@@ -22,18 +25,22 @@
                           </mat-option>
                         </mat-select>
                     </mat-form-field>
-                    <span *ngIf="column.columnType === ColumnType.Text">
+                    <span *ngIf="column.columnType === ColumnType.Text" [ngClass]="{'padding-right': column.align === 'right' && column.sort}">
                         {{ element[column.name] }}
                     </span>
-                    <button mat-icon-button *ngIf="column.columnType === ColumnType.Icon" [attr.aria-label]="column.ariaLabel">
-                        <mat-icon>{{ column.name }}</mat-icon>
-                    </button>
+                    <div *ngIf="column.columnType === ColumnType.LinkAndDescription" [ngClass]="{'padding-right': column.align === 'right' && column.sort}">
+                        <div>
+                            <a tabindex="0" (click)="emitClickedElement(element)">
+                                {{ element[column.name].Link }}
+                            </a>
+                        </div>
+                        <div class="description"> {{ element[column.name].Description }} </div>
+                    </div>
                 </td>
             </ng-container>
 
             <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: gridDataSource?.paginator.pageSize > verticalScrollOffsetInRows"></tr>
-            <tr mat-row [ngStyle]="needRowClick && {'cursor': 'pointer'}" [ngClass]="{'selected-row': selectedRow === row}" 
-                *matRowDef="let row; columns: displayedColumns;" (click)="emitClickedRowElement(row)"></tr> <!--[attr.tabindex]="needRowClick ? 0 : ''"-->
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
         </table>
     </div>
     <div *ngIf="!dataSource" class="loading-message">

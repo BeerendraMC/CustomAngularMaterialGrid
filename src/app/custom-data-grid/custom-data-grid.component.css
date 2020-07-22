@@ -18,13 +18,14 @@ td.mat-cell {
   font-size: 14px;
   letter-spacing: 0.25px;
   border: none;
+  font-weight: 400
 }
 
 th.mat-header-cell {
   color: rgba(0, 0, 0, 0.87);
   /* font-family: "Open Sans"; */
   font-size: 14px;
-  /* font-weight: 600; */
+  font-weight: 500;
   letter-spacing: 0.1px;
 }
 
@@ -34,10 +35,6 @@ tr.mat-row {
 
 tr.mat-row:hover {
   background-color: rgba(0, 0, 0, 0.04);
-}
-
-tr.mat-row.selected-row {
-  background-color: rgba(0, 0, 0, 0.08);
 }
 
 :host ::ng-deep .mat-paginator-outer-container {
@@ -105,9 +102,17 @@ td.mat-cell a:active {
   text-decoration: none;
 }
 
-/* .dropdown-field.mat-form-field .mat-select {
+td.mat-cell .description {
+  color: rgba(0,0,0,0.6);
+  /* font-family: "Open Sans"; */
+  font-size: 12px;
+  letter-spacing: 0.41px;
+  line-height: 16px;
+}
+
+.dropdown-field.mat-form-field .mat-select {
   font-weight: 300;
-} */
+}
 
 .dropdown-field.mat-form-field ::ng-deep .mat-form-field-underline,
 :host ::ng-deep .mat-paginator-page-size .mat-form-field-underline {
@@ -155,4 +160,8 @@ td.mat-cell a:active {
 
 .td-center {
   text-align: center;
+}
+
+.padding-right {
+  padding-right: 16px;
 }

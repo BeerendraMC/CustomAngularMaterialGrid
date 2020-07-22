@@ -19,20 +19,17 @@ export class CustomDataGridComponent implements OnInit, OnChanges {
   @Input() pageSizeOptions?: number[] = [5, 10, 20];
   @Input() verticalScrollOffsetInRows?: number; /* No. of rows to introduce vertical scroll if the displayed no. of rows > this no. */
   @Input() searchOption?: { onColumn: string; searchTextBoxLabel: string; searchBoxStyle?: Object }; /* for global filter set onColumn: 'globalFilter' */
-  @Input() noDataMessage = 'No data available.';
-  @Input() needRowClick = false;
-  @Input() defaultSelectedRow?: any;
+  @Input() noDataMessage?: string = 'N/A';
 
   @Output() OnLinkClick: EventEmitter<any> = new EventEmitter<any>();
   @Output() OnSelectionChange: EventEmitter<any> = new EventEmitter<any>();
-  @Output() OnRowClick: EventEmitter<any> = new EventEmitter<any>();
 
   @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
   @ViewChild(MatSort, { static: true }) sort: MatSort;
 
   gridDataSource: MatTableDataSource<any>;
   tableScrollStyle: Object;
-  selectedRow: any;
+  private sortState: Sort;
 
   get ColumnType() { return ColumnType; }
 
@@ -40,15 +37,16 @@ export class CustomDataGridComponent implements OnInit, OnChanges {
 
   ngOnInit() {
     if (this.defaultSortColumn) {
-      const sortState: Sort = { active: this.defaultSortColumn.name, direction: this.defaultSortColumn.sortDirection };
-      this.sort.active = sortState.active;
-      this.sort.direction = sortState.direction;
-      this.sort.sortChange.emit(sortState);
+      this.sortState = { active: this.defaultSortColumn.name, direction: this.defaultSortColumn.sortDirection };
+      this.sort.active = this.sortState.active;
+      this.sort.direction = this.sortState.direction;
     }
     if (this.verticalScrollOffsetInRows) {
       const maxHeight = 56 * (this.verticalScrollOffsetInRows + 1);
-      this.tableScrollStyle = { 'max-height': maxHeight.toString() + 'px', 'overflow': 'auto' };
+      this.tableScrollStyle = { 'max-height': maxHeight.toString() + 'px', 'overflow-y': 'auto' };
     }
+    // If the user changes the sort order, reset back to the first page.
+    this.sort.sortChange.subscribe(() => this.paginator.pageIndex = 0);
   }
 
   ngOnChanges() {
@@ -59,22 +57,25 @@ export class CustomDataGridComponent implements OnInit, OnChanges {
       this.gridDataSource.sortingDataAccessor = (data: any, property: string) => {
         if (typeof data[property] === 'string') {
           return data[property].toLowerCase();
-        } else {
-          return data[property];
+        } else if (typeof data[property] === 'object' && typeof data[property].getDate !== 'function') {
+          return (<string>data[property].Link).toLowerCase();
         }
+        return data[property];
       };
+      if (this.sortState) {
+        this.sort.sortChange.emit(this.sortState);
+      }
       if (this.searchOption && this.searchOption.onColumn !== 'globalFilter') {
         this.gridDataSource.filterPredicate = (data: any, filter: string) => {
           if (data[this.searchOption.onColumn] instanceof Date) {
             return this.datePipe.transform(data[this.searchOption.onColumn]).toLowerCase().indexOf(filter) != -1;
           } else if (typeof data[this.searchOption.onColumn] === 'number') {
             return data[this.searchOption.onColumn].toString().toLowerCase().indexOf(filter) != -1;
+          } else if (typeof data[this.searchOption.onColumn] === 'object') {
+            return (<string>data[this.searchOption.onColumn].Link).toLowerCase().indexOf(filter) != -1;
           }
           return data[this.searchOption.onColumn].toLowerCase().indexOf(filter) != -1;
         };
-      }
-      if (this.needRowClick && this.defaultSelectedRow) {
-        this.selectedRow = this.defaultSelectedRow;
       }
     }
   }
@@ -97,13 +98,6 @@ export class CustomDataGridComponent implements OnInit, OnChanges {
     this.OnSelectionChange.emit(emitData);
   }
 
-  emitClickedRowElement(element: any) {
-    if (this.needRowClick) {
-      this.selectedRow = element;
-      this.OnRowClick.emit(element);
-    }
-  }
-
 }
 
 export enum ColumnType {
@@ -111,7 +105,7 @@ export enum ColumnType {
   Date,
   Link,
   Dropdown,
-  Icon
+  LinkAndDescription
 }
 
 export interface GridConfig {
@@ -120,8 +114,6 @@ export interface GridConfig {
   columnType: ColumnType;
   style?: Object;
   sort?: boolean;
-  disableClearSort?: boolean;
   dropdownValues?: Array<{ value: any; viewValue: any }>;
-  align?: 'right' | 'center'; /* left is the default alignment of mat-table */
-  ariaLabel?: string;
+  align?: 'right' | 'center';
 }

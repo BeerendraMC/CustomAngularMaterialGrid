@@ -4,23 +4,16 @@
     [gridConfig]="gridConfiguration"
     [displayedColumns]="displayedColumns"
     [dataSource]="Employees"
-    [defaultSortColumn]="{name: 'dob', sortDirection: 'desc'}"
+    [defaultSortColumn]="{name: 'name', sortDirection: 'asc'}"
     [verticalScrollOffsetInRows]="5"
     [searchOption]="{onColumn: 'name', searchTextBoxLabel: 'Search by Name'}"
-    [needRowClick]="true"
-    [defaultSelectedRow]="defaultSelectedEmployee"
     (OnLinkClick)="onNameClick($event)"
     (OnSelectionChange)="onGenderChange($event)"
-    (OnRowClick)="onRowClick($event)"
   ></custom-data-grid>
   <div style="display: flex; justify-content: space-evenly; padding-top: 2%;">
     <div *ngIf="selectedEmployee">
       <span>Data emitted by OnLinkClick event:</span>
       <pre>{{selectedEmployee | json}}</pre>
-    </div>
-    <div *ngIf="selectedRow">
-      <span>Data emitted by OnRowClick event:</span>
-      <pre>{{selectedRow | json}}</pre>
     </div>
     <div *ngIf="GenderChangeData">
       <span>Data emitted by OnSelectionChange event:</span>
