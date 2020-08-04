@@ -18,13 +18,37 @@ export class AppComponent implements OnInit {
 
   ngOnInit() {
     this.gridConfiguration = [
-      { name: 'id', label: 'Id', columnType: ColumnType.Text, sort: true, },
+      { name: 'id', label: 'Id', columnType: ColumnType.Text, sort: true },
       { name: 'name', label: 'Name', columnType: ColumnType.Link, sort: true },
-      { name: 'gender', label: 'Gender', columnType: ColumnType.Dropdown, sort: true,
-      dropdownValues: [{value: 'male', viewValue: 'Male'}, {value: 'female', viewValue: 'Female'}] },
-      { name: 'phone', label: 'Phone', columnType: ColumnType.Text, sort: true },
-      { name: 'dob', label: 'DOB', columnType: ColumnType.Date, sort: true, align: 'right' },
-      { name: 'email', label: 'Email', columnType: ColumnType.Text, align: 'center' },
+      {
+        name: 'gender',
+        label: 'Gender',
+        columnType: ColumnType.Dropdown,
+        sort: true,
+        dropdownValues: [
+          { value: 'male', viewValue: 'Male' },
+          { value: 'female', viewValue: 'Female' }
+        ]
+      },
+      {
+        name: 'phone',
+        label: 'Phone',
+        columnType: ColumnType.Text,
+        sort: true
+      },
+      {
+        name: 'dob',
+        label: 'DOB',
+        columnType: ColumnType.Date,
+        sort: true,
+        align: 'right'
+      },
+      {
+        name: 'email',
+        label: 'Email',
+        columnType: ColumnType.Text,
+        align: 'center'
+      }
     ];
 
     this.displayedColumns = ['id', 'name', 'gender', 'phone', 'dob', 'email'];
@@ -34,7 +58,7 @@ export class AppComponent implements OnInit {
   getEmployees() {
     this._http.get<IEmployee[]>('http://localhost:3000/employees').subscribe(
       (data: IEmployee[]) => {
-        data.forEach(emp => emp.dob = new Date(emp.dob));
+        data.forEach(emp => (emp.dob = new Date(emp.dob)));
         setTimeout(() => {
           this.Employees = data;
         }, 2000);
@@ -52,7 +76,6 @@ export class AppComponent implements OnInit {
   onGenderChange(data: any) {
     this.GenderChangeData = data;
   }
-
 }
 
 interface IEmployee {

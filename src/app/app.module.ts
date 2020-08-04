@@ -19,10 +19,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatButtonModule } from '@angular/material/button';
 
 @NgModule({
-  declarations: [
-    AppComponent,
-    CustomDataGridComponent
-  ],
+  declarations: [AppComponent, CustomDataGridComponent],
   imports: [
     BrowserModule,
     HttpClientModule,
@@ -41,4 +38,4 @@ import { MatButtonModule } from '@angular/material/button';
   providers: [DatePipe],
   bootstrap: [AppComponent]
 })
-export class AppModule { }
+export class AppModule {}
