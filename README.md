@@ -74,7 +74,7 @@ gridConfiguration: GridConfig[] = [
 ### List of Features supported by Grid component
 
 - Sort on individual column and default sort option
-- Search (Globally or on a particular column. For global filter you must pass ‘globalFilter’ string to the ‘onColumn’ property of ‘searchOption’ input object)
+- Search (Globally or on a particular column or on any two columns. For global filter you must pass ‘globalFilter’ string to the ‘onColumn’ property of ‘searchOption’ input object)
 - Pagination
 - Configurable page size options
 - Vertical scroll bar if the user selects more than the given no of rows per page (that number is configurable). When the user selects 20 rows per page from the page size options the height of the grid increases but our customer wanted to freeze the height to display a certain no of rows (10 or 5) and introduce a vertical scroll if the user wants to view more rows than that number.
