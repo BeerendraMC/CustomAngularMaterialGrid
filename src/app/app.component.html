@@ -6,7 +6,10 @@
     [dataSource]="Employees"
     [defaultSortColumn]="{ name: 'name', sortDirection: 'asc' }"
     [verticalScrollOffsetInRows]="5"
-    [searchOption]="{ onColumn: 'name', searchTextBoxLabel: 'Search by Name' }"
+    [searchOption]="{
+      onTwoColumns: ['dob', 'name'],
+      searchTextBoxLabel: 'Search by Name'
+    }"
     (OnLinkClick)="onNameClick($event)"
     (OnSelectionChange)="onGenderChange($event)"
   ></app-custom-data-grid>
