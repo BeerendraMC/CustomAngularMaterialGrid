@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 import { GridConfig, ColumnType } from './custom-data-grid/custom-data-grid.component';
+import { EmployeeService } from './employee.service';
+import { IEmployee } from './models/employee';
 
 @Component({
   selector: 'app-root',
@@ -14,9 +15,14 @@ export class AppComponent implements OnInit {
   selectedEmployee: IEmployee;
   GenderChangeData: any;
 
-  constructor(private _http: HttpClient) {}
+  constructor(private employeeService: EmployeeService) {}
 
   ngOnInit() {
+    this.setGridConfigs();
+    this.getEmps();
+  }
+
+  setGridConfigs() {
     this.gridConfiguration = [
       { name: 'id', label: 'Id', columnType: ColumnType.Text, sort: true },
       { name: 'name', label: 'Name', columnType: ColumnType.Link, sort: true },
@@ -52,11 +58,10 @@ export class AppComponent implements OnInit {
     ];
 
     this.displayedColumns = ['id', 'name', 'gender', 'phone', 'dob', 'email'];
-    this.getEmployees();
   }
 
-  getEmployees() {
-    this._http.get<IEmployee[]>('http://localhost:3000/employees').subscribe(
+  getEmps() {
+    this.employeeService.getEmployees().subscribe(
       (data: IEmployee[]) => {
         data.forEach(emp => (emp.dob = new Date(emp.dob)));
         setTimeout(() => {
@@ -76,13 +81,4 @@ export class AppComponent implements OnInit {
   onGenderChange(data: any) {
     this.GenderChangeData = data;
   }
-}
-
-interface IEmployee {
-  id: number;
-  name: string;
-  gender: string;
-  phone: number;
-  dob: Date | string;
-  email: string;
 }
