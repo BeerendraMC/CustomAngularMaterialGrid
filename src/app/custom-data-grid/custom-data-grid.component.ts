@@ -4,6 +4,7 @@ import { MatSort, Sort, SortDirection } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSelectChange } from '@angular/material/select';
+import { ColumnType, GridConfig } from '../models/custom-data-grid';
 
 @Component({
   selector: 'app-custom-data-grid',
@@ -54,7 +55,7 @@ export class CustomDataGridComponent implements OnInit, OnChanges {
     if (this.verticalScrollOffsetInRows) {
       const maxHeight = 56 * (this.verticalScrollOffsetInRows + 1);
       this.tableScrollStyle = {
-        'max-height': maxHeight.toString() + 'px',
+        'max-height': `${maxHeight}px`,
         'overflow-y': 'auto'
       };
     }
@@ -105,46 +106,36 @@ export class CustomDataGridComponent implements OnInit, OnChanges {
   customFilterPredicate(): (data: any, filter: string) => boolean {
     const myFilterPredicate = (data: any, filter: string) => {
       let isMatched: boolean;
+      const onColumnData = data[this.searchOption.onColumn];
+      const onTwoColumnsData = [data[this.searchOption.onTwoColumns[0]], data[this.searchOption.onTwoColumns[1]]];
       if (this.searchOption.onColumn) {
-        if (data[this.searchOption.onColumn] instanceof Date) {
-          isMatched = this.datePipe.transform(data[this.searchOption.onColumn]).toLowerCase().indexOf(filter) !== -1;
-        } else if (typeof data[this.searchOption.onColumn] === 'object') {
-          isMatched = (data[this.searchOption.onColumn].Link as string).toLowerCase().indexOf(filter) !== -1;
+        if (onColumnData instanceof Date) {
+          isMatched = this.datePipe.transform(onColumnData).toLowerCase().indexOf(filter) !== -1;
+        } else if (typeof onColumnData === 'object') {
+          isMatched = (onColumnData.Link as string).toLowerCase().indexOf(filter) !== -1;
         }
-        isMatched = data[this.searchOption.onColumn].toString().toLowerCase().indexOf(filter) !== -1;
+        isMatched = onColumnData.toString().toLowerCase().indexOf(filter) !== -1;
       } else if (this.searchOption.onTwoColumns && this.searchOption.onTwoColumns.length > 1) {
-        if (
-          data[this.searchOption.onTwoColumns[0]] instanceof Date &&
-          data[this.searchOption.onTwoColumns[1]] instanceof Date
-        ) {
+        if (onTwoColumnsData[0] instanceof Date && onTwoColumnsData[1] instanceof Date) {
           isMatched =
-            this.datePipe.transform(data[this.searchOption.onTwoColumns[0]]).toLowerCase().indexOf(filter) !== -1 ||
-            this.datePipe.transform(data[this.searchOption.onTwoColumns[1]]).toLowerCase().indexOf(filter) !== -1;
-        } else if (
-          data[this.searchOption.onTwoColumns[0]] instanceof Date &&
-          typeof data[this.searchOption.onTwoColumns[1]] === 'object'
-        ) {
+            this.datePipe.transform(onTwoColumnsData[0]).toLowerCase().indexOf(filter) !== -1 ||
+            this.datePipe.transform(onTwoColumnsData[1]).toLowerCase().indexOf(filter) !== -1;
+        } else if (onTwoColumnsData[0] instanceof Date && typeof onTwoColumnsData[1] === 'object') {
           isMatched =
-            this.datePipe.transform(data[this.searchOption.onTwoColumns[0]]).toLowerCase().indexOf(filter) !== -1 ||
-            (data[this.searchOption.onTwoColumns[1]].Link as string).toLowerCase().indexOf(filter) !== -1;
-        } else if (
-          typeof data[this.searchOption.onTwoColumns[0]] === 'object' &&
-          typeof data[this.searchOption.onTwoColumns[1]] === 'object'
-        ) {
+            this.datePipe.transform(onTwoColumnsData[0]).toLowerCase().indexOf(filter) !== -1 ||
+            (onTwoColumnsData[1].Link as string).toLowerCase().indexOf(filter) !== -1;
+        } else if (typeof onTwoColumnsData[0] === 'object' && typeof onTwoColumnsData[1] === 'object') {
           isMatched =
-            (data[this.searchOption.onTwoColumns[0]].Link as string).toLowerCase().indexOf(filter) !== -1 ||
-            (data[this.searchOption.onTwoColumns[1]].Link as string).toLowerCase().indexOf(filter) !== -1;
-        } else if (
-          typeof data[this.searchOption.onTwoColumns[0]] === 'object' &&
-          data[this.searchOption.onTwoColumns[1]] instanceof Date
-        ) {
+            (onTwoColumnsData[0].Link as string).toLowerCase().indexOf(filter) !== -1 ||
+            (onTwoColumnsData[1].Link as string).toLowerCase().indexOf(filter) !== -1;
+        } else if (typeof onTwoColumnsData[0] === 'object' && onTwoColumnsData[1] instanceof Date) {
           isMatched =
-            (data[this.searchOption.onTwoColumns[0]].Link as string).toLowerCase().indexOf(filter) !== -1 ||
-            this.datePipe.transform(data[this.searchOption.onTwoColumns[1]]).toLowerCase().indexOf(filter) !== -1;
+            (onTwoColumnsData[0].Link as string).toLowerCase().indexOf(filter) !== -1 ||
+            this.datePipe.transform(onTwoColumnsData[1]).toLowerCase().indexOf(filter) !== -1;
         }
         isMatched =
-          data[this.searchOption.onTwoColumns[0]].toString().toLowerCase().indexOf(filter) !== -1 ||
-          data[this.searchOption.onTwoColumns[1]].toString().toLowerCase().indexOf(filter) !== -1;
+          onTwoColumnsData[0].toString().toLowerCase().indexOf(filter) !== -1 ||
+          onTwoColumnsData[1].toString().toLowerCase().indexOf(filter) !== -1;
       }
 
       return isMatched;
@@ -152,22 +143,4 @@ export class CustomDataGridComponent implements OnInit, OnChanges {
 
     return myFilterPredicate;
   }
-}
-
-export enum ColumnType {
-  Text,
-  Date,
-  Link,
-  Dropdown,
-  LinkAndDescription
-}
-
-export interface GridConfig {
-  name: string;
-  label: string;
-  columnType: ColumnType;
-  style?: {};
-  sort?: boolean;
-  dropdownValues?: Array<{ value: any; viewValue: any }>;
-  align?: 'right' | 'center';
 }

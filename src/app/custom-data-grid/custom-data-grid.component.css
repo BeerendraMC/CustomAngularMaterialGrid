@@ -14,7 +14,6 @@ th.mat-header-cell {
 
 td.mat-cell {
   color: rgba(0, 0, 0, 0.87);
-  /* font-family: "Open Sans"; */
   font-size: 14px;
   letter-spacing: 0.25px;
   border: none;
@@ -23,7 +22,6 @@ td.mat-cell {
 
 th.mat-header-cell {
   color: rgba(0, 0, 0, 0.87);
-  /* font-family: "Open Sans"; */
   font-size: 14px;
   font-weight: 500;
   letter-spacing: 0.1px;
@@ -40,7 +38,6 @@ tr.mat-row:hover {
 :host ::ng-deep .mat-paginator-outer-container {
   border-top: solid 1px rgba(0, 0, 0, 0.12);
   color: rgba(0, 0, 0, 0.6);
-  /* font-family: "Open Sans"; */
   font-size: 12px;
   letter-spacing: 0.41px;
 }
@@ -72,7 +69,6 @@ tr.mat-row:hover {
 :host ::ng-deep .mat-form-field .mat-form-field-infix,
 :host ::ng-deep .mat-focused .mat-select-value-text {
   color: rgba(0, 0, 0, 0.87) !important;
-  /* font-family: "Open Sans"; */
   font-size: 14px;
   letter-spacing: 0.15px;
   line-height: 17px;
@@ -94,7 +90,6 @@ td.mat-cell a:hover,
 td.mat-cell a:focus,
 td.mat-cell a:active {
   color: #0277bd;
-  /* font-family: "Open Sans"; */
   font-size: 14px;
   letter-spacing: 0.25px;
   line-height: 20px;
@@ -104,7 +99,6 @@ td.mat-cell a:active {
 
 td.mat-cell .description {
   color: rgba(0, 0, 0, 0.6);
-  /* font-family: "Open Sans"; */
   font-size: 12px;
   letter-spacing: 0.41px;
   line-height: 16px;
@@ -123,11 +117,7 @@ td.mat-cell .description {
 .dropdown-field.mat-form-field.mat-focused ::ng-deep .mat-form-field-ripple,
 .dropdown-field.mat-form-field.mat-form-field-invalid ::ng-deep .mat-form-field-ripple,
 :host ::ng-deep .mat-paginator-page-size .mat-form-field.mat-focused .mat-form-field-ripple,
-:host
-  ::ng-deep
-  .mat-paginator-page-size
-  .mat-form-field.mat-form-field-invalid
-  .mat-form-field-ripple {
+:host ::ng-deep .mat-paginator-page-size .mat-form-field.mat-form-field-invalid .mat-form-field-ripple {
   background-color: unset !important;
   transform: unset !important;
   transition: unset !important;

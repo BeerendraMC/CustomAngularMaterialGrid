@@ -4,10 +4,7 @@
     <input matInput (keyup)="applyFilter($event)" autocomplete="off" />
     <mat-icon matPrefix>search</mat-icon>
   </mat-form-field>
-  <div
-    [ngStyle]="gridDataSource?.paginator.pageSize > verticalScrollOffsetInRows && tableScrollStyle"
-  >
-    <!-- [ngStyle]="tableScrollStyle" -->
+  <div [ngStyle]="gridDataSource?.paginator.pageSize > verticalScrollOffsetInRows && tableScrollStyle">
     <table mat-table [dataSource]="gridDataSource" matSort>
       <ng-container *ngFor="let column of gridConfig" [matColumnDef]="column.name">
         <th
@@ -49,10 +46,7 @@
             [ngStyle]="column.style"
             *ngIf="column.columnType === ColumnType.Dropdown"
           >
-            <mat-select
-              [value]="element[column.name]"
-              (selectionChange)="emitSelectedElement(element, $event)"
-            >
+            <mat-select [value]="element[column.name]" (selectionChange)="emitSelectedElement(element, $event)">
               <mat-option *ngFor="let item of column.dropdownValues" [value]="item.value">
                 {{ item.viewValue }}
               </mat-option>
@@ -86,10 +80,7 @@
 
       <tr
         mat-header-row
-        *matHeaderRowDef="
-          displayedColumns;
-          sticky: gridDataSource?.paginator.pageSize > verticalScrollOffsetInRows
-        "
+        *matHeaderRowDef="displayedColumns; sticky: gridDataSource?.paginator.pageSize > verticalScrollOffsetInRows"
       ></tr>
       <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
     </table>

@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { GridConfig, ColumnType } from './custom-data-grid/custom-data-grid.component';
+import { GridConfig, ColumnType } from './models/custom-data-grid';
 import { EmployeeService } from './employee.service';
 import { IEmployee } from './models/employee';
 
