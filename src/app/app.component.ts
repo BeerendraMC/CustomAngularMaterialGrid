@@ -24,13 +24,14 @@ export class AppComponent implements OnInit {
 
   setGridConfigs() {
     this.gridConfiguration = [
-      { name: 'id', label: 'Id', columnType: ColumnType.Text, sort: true },
-      { name: 'name', label: 'Name', columnType: ColumnType.Link, sort: true },
+      { name: 'id', label: 'Id', columnType: ColumnType.Text, sort: true, style: { width: '5%' } },
+      { name: 'name', label: 'Name', columnType: ColumnType.LinkAndDescription, sort: true, style: { width: '30%' } },
       {
         name: 'gender',
         label: 'Gender',
         columnType: ColumnType.Dropdown,
         sort: true,
+        style: { width: '100px' },
         dropdownValues: [
           { value: 'male', viewValue: 'Male' },
           { value: 'female', viewValue: 'Female' }
@@ -40,20 +41,23 @@ export class AppComponent implements OnInit {
         name: 'phone',
         label: 'Phone',
         columnType: ColumnType.Text,
-        sort: true
+        sort: true,
+        style: { width: '15%' }
       },
       {
         name: 'dob',
         label: 'DOB',
         columnType: ColumnType.Date,
         sort: true,
-        align: 'right'
+        align: 'right',
+        style: { width: '15%' }
       },
       {
         name: 'email',
         label: 'Email',
         columnType: ColumnType.Text,
-        align: 'center'
+        align: 'center',
+        style: { width: '20%' }
       }
     ];
 
@@ -63,9 +67,16 @@ export class AppComponent implements OnInit {
   getEmps() {
     this.employeeService.getEmployees().subscribe(
       (data: IEmployee[]) => {
-        data.forEach(emp => (emp.dob = new Date(emp.dob)));
+        const empData: IEmployee[] = data.map(emp => ({
+          id: emp.id,
+          name: { Link: emp.name, Description: emp.description },
+          gender: emp.gender,
+          phone: emp.phone,
+          dob: new Date(emp.dob),
+          email: emp.email
+        }));
         setTimeout(() => {
-          this.Employees = data;
+          this.Employees = empData;
         }, 2000);
       },
       err => {

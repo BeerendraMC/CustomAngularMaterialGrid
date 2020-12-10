@@ -5,7 +5,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { EmployeeService } from './employee.service';
 import { IEmployee } from './models/employee';
 
-fdescribe('EmployeeService', () => {
+describe('EmployeeService', () => {
   let httpTestingController: HttpTestingController;
   let employeeService: EmployeeService;
 

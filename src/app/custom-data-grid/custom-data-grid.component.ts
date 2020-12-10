@@ -6,31 +6,74 @@ import { MatPaginator } from '@angular/material/paginator';
 import { MatSelectChange } from '@angular/material/select';
 import { ColumnType, GridConfig } from '../models/custom-data-grid';
 
+/**
+ * A configurable and re-usable grid component built on Angular Material data table
+ * https://material.angular.io/components/table/overview
+ */
 @Component({
   selector: 'app-custom-data-grid',
   templateUrl: './custom-data-grid.component.html',
   styleUrls: ['./custom-data-grid.component.css']
 })
 export class CustomDataGridComponent implements OnInit, OnChanges {
+  /** Main grid configuration array, where each object represents the configurations of one column. */
   @Input() gridConfig: GridConfig[];
+
+  /** The set of columns to be displayed. */
   @Input() displayedColumns: string[];
+
+  /** The table's source of data. */
   @Input() dataSource: Array<any>;
+
+  /** Optional default sort column details - name and sort direction. */
   @Input() defaultSortColumn?: { name: string; sortDirection: SortDirection };
-  @Input() pageSizeOptions?: number[] = [5, 10, 20];
-  @Input()
-  verticalScrollOffsetInRows?: number; /* No. of rows to introduce vertical scroll if the displayed no. of rows > this no. */
+
+  /**
+   * The set of provided page size options to display to the user.
+   * Defaults to [5, 10, 20].
+   */
+  @Input() pageSizeOptions: number[] = [5, 10, 20];
+
+  /**
+   * Optional number of rows to introduce vertical scroll
+   * when the user selects more number of rows than it.
+   */
+  @Input() verticalScrollOffsetInRows?: number;
+
+  /**
+   * Optional filter option details.
+   * To have the global filter, set onColumn: 'globalFilter'.
+   */
   @Input() searchOption?: {
     onColumn: string;
     onTwoColumns?: string[];
     searchTextBoxLabel: string;
     searchBoxStyle?: {};
-  }; /* for global filter set onColumn: 'globalFilter' */
+  };
+
+  /**
+   * The message to be displayed when there is no data.
+   * Defaults to 'N/A'.
+   */
   @Input() noDataMessage = 'N/A';
 
+  /**
+   * Event emitted when any one of the links in the grid has been clicked by the user.
+   * Emits the clicked row data.
+   */
   @Output() OnLinkClick: EventEmitter<any> = new EventEmitter<any>();
+
+  /**
+   * Event emitted when the selected value of any one of the dropdowns in the grid
+   * has been changed by the user.
+   * Emits an object which contains clicked row data and selected value.
+   */
   @Output() OnSelectionChange: EventEmitter<any> = new EventEmitter<any>();
 
+  /** Reference to the MatPaginator. */
   @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
+
+  /** Reference to the MatSort. */
   @ViewChild(MatSort, { static: true }) sort: MatSort;
 
   gridDataSource: MatTableDataSource<any>;
@@ -85,6 +128,10 @@ export class CustomDataGridComponent implements OnInit, OnChanges {
     }
   }
 
+  /**
+   * Applies filter by filtering the grid data
+   * @param event
+   */
   applyFilter(event: Event) {
     const filterValue = (event.target as HTMLInputElement).value;
     this.gridDataSource.filter = filterValue.trim().toLowerCase();
@@ -94,15 +141,28 @@ export class CustomDataGridComponent implements OnInit, OnChanges {
     }
   }
 
+  /**
+   * Emits clicked row data.
+   * @param element
+   */
   emitClickedElement(element: any) {
     this.OnLinkClick.emit(element);
   }
 
+  /**
+   * Emits an object which includes selected row data and selected value.
+   * @param element
+   * @param event
+   */
   emitSelectedElement(element: any, event: MatSelectChange) {
     const emitData = { element, selectedValue: event.value };
     this.OnSelectionChange.emit(emitData);
   }
 
+  /**
+   * Returns a custom filter predicate function which lets us filter gird data by one or two columns
+   * @returns filterPredicate
+   */
   customFilterPredicate(): (data: any, filter: string) => boolean {
     const myFilterPredicate = (data: any, filter: string) => {
       let isMatched: boolean;
