@@ -1,7 +1,8 @@
 import { DatePipe } from '@angular/common';
 import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { MatSortModule, MatTableModule } from '@angular/material';
+import { MatSortModule } from '@angular/material/sort';
+import { MatTableModule } from '@angular/material/table';
 
 import { CustomDataGridComponent } from './custom-data-grid.component';
 
