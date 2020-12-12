@@ -88,7 +88,7 @@
   <div *ngIf="!dataSource" class="loading-message">
     <mat-spinner strokeWidth="3" [diameter]="30"></mat-spinner> &nbsp; Loading...
   </div>
-  <div *ngIf="dataSource && dataSource.length == 0" class="no-data-message">
+  <div *ngIf="dataSource?.length == 0" class="no-data-message">
     {{ noDataMessage }}
   </div>
   <mat-paginator [pageSizeOptions]="pageSizeOptions" showFirstLastButtons></mat-paginator>
