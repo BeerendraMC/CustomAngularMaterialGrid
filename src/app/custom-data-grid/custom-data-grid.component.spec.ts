@@ -1,6 +1,6 @@
 import { DatePipe } from '@angular/common';
 import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { MatSortModule } from '@angular/material/sort';
 import { MatTableModule } from '@angular/material/table';
 
@@ -10,21 +10,23 @@ describe('CustomDataGridComponent', () => {
   let component: CustomDataGridComponent;
   let fixture: ComponentFixture<CustomDataGridComponent>;
 
-  beforeEach(async(() => {
-    TestBed.configureTestingModule({
-      imports: [MatTableModule, MatSortModule],
-      declarations: [CustomDataGridComponent],
-      providers: [
-        {
-          provide: DatePipe,
-          useValue: {
-            datePipe: jasmine.createSpy('datePipe')
+  beforeEach(
+    waitForAsync(() => {
+      TestBed.configureTestingModule({
+        imports: [MatTableModule, MatSortModule],
+        declarations: [CustomDataGridComponent],
+        providers: [
+          {
+            provide: DatePipe,
+            useValue: {
+              datePipe: jasmine.createSpy('datePipe')
+            }
           }
-        }
-      ],
-      schemas: [CUSTOM_ELEMENTS_SCHEMA]
-    }).compileComponents();
-  }));
+        ],
+        schemas: [CUSTOM_ELEMENTS_SCHEMA]
+      }).compileComponents();
+    })
+  );
 
   beforeEach(() => {
     fixture = TestBed.createComponent(CustomDataGridComponent);
