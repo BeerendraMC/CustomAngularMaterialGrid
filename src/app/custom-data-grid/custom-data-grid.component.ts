@@ -166,16 +166,17 @@ export class CustomDataGridComponent implements OnInit, OnChanges {
   customFilterPredicate(): (data: any, filter: string) => boolean {
     const myFilterPredicate = (data: any, filter: string) => {
       let isMatched: boolean;
-      const onColumnData = data[this.searchOption.onColumn];
-      const onTwoColumnsData = [data[this.searchOption.onTwoColumns[0]], data[this.searchOption.onTwoColumns[1]]];
       if (this.searchOption.onColumn) {
+        const onColumnData = data[this.searchOption.onColumn];
         if (onColumnData instanceof Date) {
           isMatched = this.datePipe.transform(onColumnData).toLowerCase().indexOf(filter) !== -1;
         } else if (typeof onColumnData === 'object') {
           isMatched = (onColumnData.Link as string).toLowerCase().indexOf(filter) !== -1;
+        } else {
+          isMatched = onColumnData.toString().toLowerCase().indexOf(filter) !== -1;
         }
-        isMatched = onColumnData.toString().toLowerCase().indexOf(filter) !== -1;
       } else if (this.searchOption.onTwoColumns && this.searchOption.onTwoColumns.length > 1) {
+        const onTwoColumnsData = [data[this.searchOption.onTwoColumns[0]], data[this.searchOption.onTwoColumns[1]]];
         if (onTwoColumnsData[0] instanceof Date && onTwoColumnsData[1] instanceof Date) {
           isMatched =
             this.datePipe.transform(onTwoColumnsData[0]).toLowerCase().indexOf(filter) !== -1 ||
@@ -192,10 +193,11 @@ export class CustomDataGridComponent implements OnInit, OnChanges {
           isMatched =
             (onTwoColumnsData[0].Link as string).toLowerCase().indexOf(filter) !== -1 ||
             this.datePipe.transform(onTwoColumnsData[1]).toLowerCase().indexOf(filter) !== -1;
+        } else {
+          isMatched =
+            onTwoColumnsData[0].toString().toLowerCase().indexOf(filter) !== -1 ||
+            onTwoColumnsData[1].toString().toLowerCase().indexOf(filter) !== -1;
         }
-        isMatched =
-          onTwoColumnsData[0].toString().toLowerCase().indexOf(filter) !== -1 ||
-          onTwoColumnsData[1].toString().toLowerCase().indexOf(filter) !== -1;
       }
 
       return isMatched;
