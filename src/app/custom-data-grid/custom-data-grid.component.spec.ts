@@ -19,7 +19,15 @@ describe('CustomDataGridComponent', () => {
   const mockGridConfiguration: GridConfig[] = [
     { name: 'id', label: 'Id', columnType: ColumnType.Text },
     { name: 'name', label: 'Name', columnType: ColumnType.Link },
-    { name: 'gender', label: 'Gender', columnType: ColumnType.Text }
+    {
+      name: 'gender',
+      label: 'Gender',
+      columnType: ColumnType.Dropdown,
+      dropdownValues: [
+        { value: 'male', viewValue: 'Male' },
+        { value: 'female', viewValue: 'Female' }
+      ]
+    }
   ];
   const mockDisplayedColumns = ['id', 'name', 'gender'];
   const mockGridData = [
@@ -53,6 +61,9 @@ describe('CustomDataGridComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(CustomDataGridComponent);
     component = fixture.componentInstance;
+    component.gridConfig = mockGridConfiguration;
+    component.displayedColumns = mockDisplayedColumns;
+    component.dataSource = mockGridData;
     fixture.detectChanges();
   });
 
@@ -61,9 +72,6 @@ describe('CustomDataGridComponent', () => {
   });
 
   it('should test the table', done => {
-    component.gridConfig = mockGridConfiguration;
-    component.displayedColumns = mockDisplayedColumns;
-    component.dataSource = mockGridData;
     component.ngOnChanges();
     fixture.detectChanges();
 
@@ -87,6 +95,44 @@ describe('CustomDataGridComponent', () => {
       expect(row2.cells[0].innerHTML).toContain(mockGridData[1].id);
       expect(row2.cells[1].innerHTML).toContain(mockGridData[1].name);
       expect(row2.cells[2].innerHTML).toContain(mockGridData[1].gender);
+
+      done();
+    });
+  });
+
+  it("should emit clicked link's row data", done => {
+    let clickedRow: any;
+    component.OnLinkClick.subscribe(rowData => (clickedRow = rowData));
+    component.ngOnChanges();
+    fixture.detectChanges();
+
+    fixture.whenStable().then(() => {
+      const allLinks = fixture.nativeElement.querySelectorAll('tr a');
+
+      const firstLink = allLinks[0];
+      firstLink.click();
+      fixture.detectChanges();
+      expect(clickedRow).toBe(component.dataSource[0]);
+
+      done();
+    });
+  });
+
+  it('should emit selection changed row data with selected value', done => {
+    let selectionChangedData: { element: any; selectedValue: string };
+    component.OnSelectionChange.subscribe(data => (selectionChangedData = data));
+    component.ngOnChanges();
+    fixture.detectChanges();
+
+    fixture.whenStable().then(() => {
+      const allMatSelects = fixture.nativeElement.querySelectorAll('tr .dropdown-field .mat-select-trigger');
+      allMatSelects[0].click();
+      fixture.detectChanges();
+      const matOption = document.querySelectorAll('.mat-option')[1] as HTMLElement;
+      matOption.click();
+      fixture.detectChanges();
+      expect(selectionChangedData.element).toBe(component.dataSource[0]);
+      expect(selectionChangedData.selectedValue).toBe('female');
 
       done();
     });
