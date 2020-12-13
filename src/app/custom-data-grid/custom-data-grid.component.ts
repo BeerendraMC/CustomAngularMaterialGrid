@@ -70,6 +70,13 @@ export class CustomDataGridComponent implements OnInit, OnChanges {
    */
   @Output() OnSelectionChange: EventEmitter<any> = new EventEmitter<any>();
 
+  /**
+   * Event emitted when any one of the custom template's element in the grid has been clicked by the user
+   * if it is binding to click event.
+   * Emits the clicked row data.
+   */
+  @Output() OnCustomTemplateClick: EventEmitter<any> = new EventEmitter<any>();
+
   /** Reference to the MatPaginator. */
   @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
 
@@ -115,7 +122,8 @@ export class CustomDataGridComponent implements OnInit, OnChanges {
         if (typeof data[property] === 'string') {
           return data[property].toLowerCase();
         } else if (typeof data[property] === 'object' && typeof data[property].getDate !== 'function') {
-          return (data[property].Link as string).toLowerCase();
+          const dataObj = data[property];
+          return (dataObj[dataObj.SearchSortField] as string).toLowerCase();
         }
         return data[property];
       };
@@ -150,6 +158,14 @@ export class CustomDataGridComponent implements OnInit, OnChanges {
   }
 
   /**
+   * Emits clicked row data for custom template.
+   * @param element
+   */
+  emitClickedElementForCustomTemplate(element: any) {
+    this.OnCustomTemplateClick.emit(element);
+  }
+
+  /**
    * Emits an object which includes selected row data and selected value.
    * @param element
    * @param event
@@ -171,28 +187,33 @@ export class CustomDataGridComponent implements OnInit, OnChanges {
         if (onColumnData instanceof Date) {
           isMatched = this.datePipe.transform(onColumnData).toLowerCase().indexOf(filter) !== -1;
         } else if (typeof onColumnData === 'object') {
-          isMatched = (onColumnData.Link as string).toLowerCase().indexOf(filter) !== -1;
+          isMatched = (onColumnData[onColumnData.SearchSortField] as string).toLowerCase().indexOf(filter) !== -1;
         } else {
           isMatched = onColumnData.toString().toLowerCase().indexOf(filter) !== -1;
         }
       } else if (this.searchOption.onTwoColumns && this.searchOption.onTwoColumns.length > 1) {
         const onTwoColumnsData = [data[this.searchOption.onTwoColumns[0]], data[this.searchOption.onTwoColumns[1]]];
+        let dataObj0, dataObj1;
         if (onTwoColumnsData[0] instanceof Date && onTwoColumnsData[1] instanceof Date) {
           isMatched =
             this.datePipe.transform(onTwoColumnsData[0]).toLowerCase().indexOf(filter) !== -1 ||
             this.datePipe.transform(onTwoColumnsData[1]).toLowerCase().indexOf(filter) !== -1;
         } else if (onTwoColumnsData[0] instanceof Date && typeof onTwoColumnsData[1] === 'object') {
+          dataObj1 = onTwoColumnsData[1];
           isMatched =
             this.datePipe.transform(onTwoColumnsData[0]).toLowerCase().indexOf(filter) !== -1 ||
-            (onTwoColumnsData[1].Link as string).toLowerCase().indexOf(filter) !== -1;
-        } else if (typeof onTwoColumnsData[0] === 'object' && typeof onTwoColumnsData[1] === 'object') {
-          isMatched =
-            (onTwoColumnsData[0].Link as string).toLowerCase().indexOf(filter) !== -1 ||
-            (onTwoColumnsData[1].Link as string).toLowerCase().indexOf(filter) !== -1;
+            (dataObj1[dataObj1.SearchSortField] as string).toLowerCase().indexOf(filter) !== -1;
         } else if (typeof onTwoColumnsData[0] === 'object' && onTwoColumnsData[1] instanceof Date) {
+          dataObj0 = onTwoColumnsData[0];
           isMatched =
-            (onTwoColumnsData[0].Link as string).toLowerCase().indexOf(filter) !== -1 ||
+            (dataObj0[dataObj0.SearchSortField] as string).toLowerCase().indexOf(filter) !== -1 ||
             this.datePipe.transform(onTwoColumnsData[1]).toLowerCase().indexOf(filter) !== -1;
+        } else if (typeof onTwoColumnsData[0] === 'object' && typeof onTwoColumnsData[1] === 'object') {
+          dataObj0 = onTwoColumnsData[0];
+          dataObj1 = onTwoColumnsData[1];
+          isMatched =
+            (dataObj0[dataObj0.SearchSortField] as string).toLowerCase().indexOf(filter) !== -1 ||
+            (dataObj1[dataObj1.SearchSortField] as string).toLowerCase().indexOf(filter) !== -1;
         } else {
           isMatched =
             onTwoColumnsData[0].toString().toLowerCase().indexOf(filter) !== -1 ||

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { GridConfig, ColumnType } from './models/custom-data-grid';
 import { EmployeeService } from './employee.service';
 import { IEmployee } from './models/employee';
@@ -14,6 +14,9 @@ export class AppComponent implements OnInit {
   Employees: IEmployee[];
   selectedEmployee: IEmployee;
   GenderChangeData: any;
+  clickedEmployee: IEmployee;
+
+  @ViewChild('homeTownTemplate', { static: true }) homeTownTemplate: TemplateRef<any>;
 
   constructor(private employeeService: EmployeeService) {}
 
@@ -25,7 +28,7 @@ export class AppComponent implements OnInit {
   setGridConfigs() {
     this.gridConfiguration = [
       { name: 'id', label: 'Id', columnType: ColumnType.Text, sort: true, style: { width: '5%' } },
-      { name: 'name', label: 'Name', columnType: ColumnType.LinkAndDescription, sort: true, style: { width: '30%' } },
+      { name: 'name', label: 'Name', columnType: ColumnType.LinkAndDescription, sort: true, style: { width: '25%' } },
       {
         name: 'gender',
         label: 'Gender',
@@ -42,7 +45,7 @@ export class AppComponent implements OnInit {
         label: 'Phone',
         columnType: ColumnType.Text,
         sort: true,
-        style: { width: '15%' }
+        style: { width: '10%' }
       },
       {
         name: 'dob',
@@ -57,11 +60,19 @@ export class AppComponent implements OnInit {
         label: 'Email',
         columnType: ColumnType.Text,
         align: 'center',
-        style: { width: '20%' }
+        style: { width: '15%' }
+      },
+      {
+        name: 'homeTown',
+        label: 'Home Town',
+        columnType: ColumnType.CustomTemplate,
+        customTemplate: this.homeTownTemplate,
+        sort: true,
+        style: { width: '15%' }
       }
     ];
 
-    this.displayedColumns = ['id', 'name', 'gender', 'phone', 'dob', 'email'];
+    this.displayedColumns = ['id', 'name', 'gender', 'phone', 'dob', 'email', 'homeTown'];
   }
 
   getEmps() {
@@ -69,11 +80,12 @@ export class AppComponent implements OnInit {
       (data: IEmployee[]) => {
         const empData: IEmployee[] = data.map(emp => ({
           id: emp.id,
-          name: { Link: emp.name, Description: emp.description },
+          name: { Link: emp.name, Description: emp.description, SearchSortField: 'Link' },
           gender: emp.gender,
           phone: emp.phone,
           dob: new Date(emp.dob),
-          email: emp.email
+          email: emp.email,
+          homeTown: { ...emp.homeTown, SearchSortField: 'name' }
         }));
         setTimeout(() => {
           this.Employees = empData;
@@ -91,5 +103,9 @@ export class AppComponent implements OnInit {
 
   onGenderChange(data: any) {
     this.GenderChangeData = data;
+  }
+
+  launchIconClickHandler(emp: IEmployee) {
+    this.clickedEmployee = emp;
   }
 }

@@ -7,11 +7,12 @@
     [defaultSortColumn]="{ name: 'name', sortDirection: 'asc' }"
     [verticalScrollOffsetInRows]="5"
     [searchOption]="{
-      onTwoColumns: ['dob', 'name'],
+      onTwoColumns: ['name', 'dob'],
       searchTextBoxLabel: 'Search by Name or DOB'
     }"
     (OnLinkClick)="onNameClick($event)"
     (OnSelectionChange)="onGenderChange($event)"
+    (OnCustomTemplateClick)="launchIconClickHandler($event)"
   ></app-custom-data-grid>
   <div style="display: flex; justify-content: space-evenly; padding-top: 2%;">
     <div *ngIf="selectedEmployee">
@@ -22,5 +23,18 @@
       <span>Data emitted by OnSelectionChange event:</span>
       <pre>{{ GenderChangeData | json }}</pre>
     </div>
+    <div *ngIf="clickedEmployee">
+      <span>Data emitted by OnCustomTemplateClick event:</span>
+      <pre>{{ clickedEmployee | json }}</pre>
+    </div>
   </div>
 </div>
+
+<ng-template #homeTownTemplate let-rowData="rowData" let-clickEventHandler="clickEventHandler">
+  <span class="home-town-container">
+    <span>{{ rowData?.homeTown?.name }}</span>
+    <a [href]="rowData?.homeTown?.link" target="_blank" (click)="clickEventHandler(rowData)">
+      <mat-icon>launch</mat-icon>
+    </a>
+  </span>
+</ng-template>

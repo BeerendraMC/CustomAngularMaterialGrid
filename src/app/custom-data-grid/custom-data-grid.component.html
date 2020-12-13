@@ -75,6 +75,22 @@
               {{ element[column.name].Description }}
             </div>
           </div>
+          <div
+            *ngIf="column.columnType === ColumnType.CustomTemplate"
+            [ngClass]="{
+              'padding-right': column.align === 'right' && column.sort
+            }"
+          >
+            <ng-container
+              *ngTemplateOutlet="
+                column.customTemplate;
+                context: {
+                  rowData: element,
+                  clickEventHandler: this.emitClickedElementForCustomTemplate.bind(this)
+                }
+              "
+            ></ng-container>
+          </div>
         </td>
       </ng-container>
 

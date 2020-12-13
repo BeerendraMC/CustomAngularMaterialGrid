@@ -6,4 +6,5 @@ export interface IEmployee {
   phone: number;
   dob: Date | string;
   email: string;
+  homeTown?: {};
 }
