@@ -130,8 +130,11 @@ export class CustomDataGridComponent implements OnInit, OnChanges {
       if (this.sortState) {
         this.sort.sortChange.emit(this.sortState);
       }
-      if (this.searchOption && this.searchOption.onColumn !== 'globalFilter') {
-        this.gridDataSource.filterPredicate = this.customFilterPredicate();
+      if (this.searchOption) {
+        this.gridDataSource.filterPredicate =
+          this.searchOption.onColumn === 'globalFilter'
+            ? this.customGlobalFilterPredicate()
+            : this.customFilterPredicate();
       }
     }
   }
@@ -222,6 +225,43 @@ export class CustomDataGridComponent implements OnInit, OnChanges {
       }
 
       return isMatched;
+    };
+
+    return myFilterPredicate;
+  }
+
+  /** Recursive function to fetch SearchSortField value of the object for global filter */
+  nestedFilterCheck(search: string, data: any, key: string) {
+    if (data[key] instanceof Date) {
+      search += this.datePipe.transform(data[key]).toLowerCase();
+    } else if (typeof data[key] === 'object') {
+      search = this.nestedFilterCheck(search, data[key], data[key].SearchSortField);
+      /**
+       * Use below logic to reduce all the object values and to search by all the fields of the objects.
+       * for (const k in data[key]) {
+       *   if (data[key][k] !== null) {
+       *     search = this.nestedFilterCheck(search, data[key], k);
+       *   }
+       * }
+       */
+    } else {
+      search += data[key];
+    }
+    return search;
+  }
+
+  /**
+   * Returns a custom global filter predicate function which lets us filter gird data globally
+   * @returns filterPredicate
+   */
+  customGlobalFilterPredicate(): (data: any, filter: string) => boolean {
+    const myFilterPredicate = (data: any, filter: string) => {
+      const accumulator = (currentTerm: string, key: string) => {
+        return this.nestedFilterCheck(currentTerm, data, key);
+      };
+      const dataStr = Object.keys(data).reduce(accumulator, '').toLowerCase();
+      const transformedFilter = filter.trim().toLowerCase();
+      return dataStr.indexOf(transformedFilter) !== -1;
     };
 
     return myFilterPredicate;
