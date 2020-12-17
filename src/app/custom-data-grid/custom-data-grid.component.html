@@ -7,7 +7,7 @@
   <div
     [ngStyle]="
       (gridDataSource?.paginator?.pageSize > verticalScrollOffsetInRows ||
-        (!requirePagination && !!verticalScrollOffsetInRows)) &&
+        (!requirePagination && dataSource?.length > verticalScrollOffsetInRows)) &&
       tableScrollStyle
     "
   >
@@ -105,7 +105,7 @@
         *matHeaderRowDef="
           displayedColumns;
           sticky: gridDataSource?.paginator?.pageSize > verticalScrollOffsetInRows ||
-            (!requirePagination && !!verticalScrollOffsetInRows)
+            (!requirePagination && dataSource?.length > verticalScrollOffsetInRows)
         "
       ></tr>
       <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
