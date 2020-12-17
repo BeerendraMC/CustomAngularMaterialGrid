@@ -4,7 +4,13 @@
     <input matInput (keyup)="applyFilter($event)" autocomplete="off" />
     <mat-icon matPrefix>search</mat-icon>
   </mat-form-field>
-  <div [ngStyle]="gridDataSource?.paginator.pageSize > verticalScrollOffsetInRows && tableScrollStyle">
+  <div
+    [ngStyle]="
+      (gridDataSource?.paginator?.pageSize > verticalScrollOffsetInRows ||
+        (!requirePagination && !!verticalScrollOffsetInRows)) &&
+      tableScrollStyle
+    "
+  >
     <table mat-table [dataSource]="gridDataSource" matSort>
       <ng-container *ngFor="let column of gridConfig" [matColumnDef]="column.name">
         <th
@@ -96,7 +102,11 @@
 
       <tr
         mat-header-row
-        *matHeaderRowDef="displayedColumns; sticky: gridDataSource?.paginator.pageSize > verticalScrollOffsetInRows"
+        *matHeaderRowDef="
+          displayedColumns;
+          sticky: gridDataSource?.paginator?.pageSize > verticalScrollOffsetInRows ||
+            (!requirePagination && !!verticalScrollOffsetInRows)
+        "
       ></tr>
       <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
     </table>
@@ -107,5 +117,5 @@
   <div *ngIf="dataSource?.length == 0" class="no-data-message">
     {{ noDataMessage }}
   </div>
-  <mat-paginator [pageSizeOptions]="pageSizeOptions" showFirstLastButtons></mat-paginator>
+  <mat-paginator [pageSizeOptions]="pageSizeOptions" *ngIf="requirePagination" showFirstLastButtons></mat-paginator>
 </div>

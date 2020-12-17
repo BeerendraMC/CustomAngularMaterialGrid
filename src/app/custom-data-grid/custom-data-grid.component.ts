@@ -58,6 +58,12 @@ export class CustomDataGridComponent implements OnInit, OnChanges {
   @Input() noDataMessage = 'N/A';
 
   /**
+   * The flag to turn pagination on or off.
+   * Defaults to on.
+   */
+  @Input() requirePagination: boolean = true;
+
+  /**
    * Event emitted when any one of the links in the grid has been clicked by the user.
    * Emits the clicked row data.
    */
@@ -78,7 +84,7 @@ export class CustomDataGridComponent implements OnInit, OnChanges {
   @Output() OnCustomTemplateClick: EventEmitter<any> = new EventEmitter<any>();
 
   /** Reference to the MatPaginator. */
-  @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
+  @ViewChild(MatPaginator, { static: false }) paginator: MatPaginator;
 
   /** Reference to the MatSort. */
   @ViewChild(MatSort, { static: true }) sort: MatSort;
@@ -109,14 +115,18 @@ export class CustomDataGridComponent implements OnInit, OnChanges {
         'overflow-y': 'auto'
       };
     }
-    // If the user changes the sort order, reset back to the first page.
-    this.sort.sortChange.subscribe(() => (this.paginator.pageIndex = 0));
+    if (this.requirePagination) {
+      // If the user changes the sort order, reset back to the first page.
+      this.sort.sortChange.subscribe(() => (this.paginator.pageIndex = 0));
+    }
   }
 
   ngOnChanges() {
     if (this.dataSource) {
       this.gridDataSource = new MatTableDataSource(this.dataSource);
-      this.gridDataSource.paginator = this.paginator;
+      if (this.requirePagination) {
+        this.gridDataSource.paginator = this.paginator;
+      }
       this.gridDataSource.sort = this.sort;
       this.gridDataSource.sortingDataAccessor = (data: any, property: string) => {
         if (typeof data[property] === 'string') {
