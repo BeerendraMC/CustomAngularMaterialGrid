@@ -109,6 +109,16 @@
       "dob": "1937/12/28",
       "email": "ratan.t@gmail.com",
       "homeTown": { "name": "Mumbai", "link": "https://en.wikipedia.org/wiki/Mumbai" }
+    },
+    {
+      "id": 12,
+      "name": null,
+      "description": null,
+      "gender": null,
+      "phone": null,
+      "dob": null,
+      "email": null,
+      "homeTown": null
     }
   ]
 }

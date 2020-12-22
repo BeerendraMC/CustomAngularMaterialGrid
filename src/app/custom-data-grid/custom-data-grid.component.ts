@@ -129,11 +129,14 @@ export class CustomDataGridComponent implements OnInit, OnChanges {
       }
       this.gridDataSource.sort = this.sort;
       this.gridDataSource.sortingDataAccessor = (data: any, property: string) => {
+        if (!data[property]) {
+          return null;
+        }
         if (typeof data[property] === 'string') {
           return data[property].toLowerCase();
         } else if (typeof data[property] === 'object' && typeof data[property].getDate !== 'function') {
           const dataObj = data[property];
-          return (dataObj[dataObj.SearchSortField] as string).toLowerCase();
+          return dataObj[dataObj.SearchSortField] ? (dataObj[dataObj.SearchSortField] as string).toLowerCase() : null;
         }
         return data[property];
       };
@@ -188,6 +191,23 @@ export class CustomDataGridComponent implements OnInit, OnChanges {
     this.OnSelectionChange.emit(emitData);
   }
 
+  /** Searches the filter string in different types of data and returns boolean. */
+  isSearchTermMatched(data: any, filter: string): boolean {
+    let returnValue: boolean;
+    if (!data || !filter) {
+      returnValue = false;
+    } else if (data instanceof Date) {
+      returnValue = this.datePipe.transform(data).toLowerCase().indexOf(filter) !== -1;
+    } else if (typeof data === 'object') {
+      returnValue = data[data.SearchSortField]
+        ? (data[data.SearchSortField] as string).toLowerCase().indexOf(filter) !== -1
+        : false;
+    } else {
+      returnValue = data.toString().toLowerCase().indexOf(filter) !== -1;
+    }
+    return returnValue;
+  }
+
   /**
    * Returns a custom filter predicate function which lets us filter gird data by one or two columns
    * @returns filterPredicate
@@ -196,41 +216,47 @@ export class CustomDataGridComponent implements OnInit, OnChanges {
     const myFilterPredicate = (data: any, filter: string) => {
       let isMatched: boolean;
       if (this.searchOption.onColumn) {
-        const onColumnData = data[this.searchOption.onColumn];
-        if (onColumnData instanceof Date) {
-          isMatched = this.datePipe.transform(onColumnData).toLowerCase().indexOf(filter) !== -1;
-        } else if (typeof onColumnData === 'object') {
-          isMatched = (onColumnData[onColumnData.SearchSortField] as string).toLowerCase().indexOf(filter) !== -1;
-        } else {
-          isMatched = onColumnData.toString().toLowerCase().indexOf(filter) !== -1;
-        }
+        isMatched = this.isSearchTermMatched(data[this.searchOption.onColumn], filter);
       } else if (this.searchOption.onTwoColumns && this.searchOption.onTwoColumns.length > 1) {
         const onTwoColumnsData = [data[this.searchOption.onTwoColumns[0]], data[this.searchOption.onTwoColumns[1]]];
-        let dataObj0, dataObj1;
-        if (onTwoColumnsData[0] instanceof Date && onTwoColumnsData[1] instanceof Date) {
-          isMatched =
-            this.datePipe.transform(onTwoColumnsData[0]).toLowerCase().indexOf(filter) !== -1 ||
-            this.datePipe.transform(onTwoColumnsData[1]).toLowerCase().indexOf(filter) !== -1;
-        } else if (onTwoColumnsData[0] instanceof Date && typeof onTwoColumnsData[1] === 'object') {
-          dataObj1 = onTwoColumnsData[1];
-          isMatched =
-            this.datePipe.transform(onTwoColumnsData[0]).toLowerCase().indexOf(filter) !== -1 ||
-            (dataObj1[dataObj1.SearchSortField] as string).toLowerCase().indexOf(filter) !== -1;
-        } else if (typeof onTwoColumnsData[0] === 'object' && onTwoColumnsData[1] instanceof Date) {
-          dataObj0 = onTwoColumnsData[0];
-          isMatched =
-            (dataObj0[dataObj0.SearchSortField] as string).toLowerCase().indexOf(filter) !== -1 ||
-            this.datePipe.transform(onTwoColumnsData[1]).toLowerCase().indexOf(filter) !== -1;
-        } else if (typeof onTwoColumnsData[0] === 'object' && typeof onTwoColumnsData[1] === 'object') {
-          dataObj0 = onTwoColumnsData[0];
-          dataObj1 = onTwoColumnsData[1];
-          isMatched =
-            (dataObj0[dataObj0.SearchSortField] as string).toLowerCase().indexOf(filter) !== -1 ||
-            (dataObj1[dataObj1.SearchSortField] as string).toLowerCase().indexOf(filter) !== -1;
+        if (!onTwoColumnsData[0]) {
+          isMatched = this.isSearchTermMatched(onTwoColumnsData[1], filter);
+        } else if (!onTwoColumnsData[1]) {
+          isMatched = this.isSearchTermMatched(onTwoColumnsData[0], filter);
         } else {
-          isMatched =
-            onTwoColumnsData[0].toString().toLowerCase().indexOf(filter) !== -1 ||
-            onTwoColumnsData[1].toString().toLowerCase().indexOf(filter) !== -1;
+          let dataObj0, dataObj1;
+          if (onTwoColumnsData[0] instanceof Date && onTwoColumnsData[1] instanceof Date) {
+            isMatched =
+              this.datePipe.transform(onTwoColumnsData[0]).toLowerCase().indexOf(filter) !== -1 ||
+              this.datePipe.transform(onTwoColumnsData[1]).toLowerCase().indexOf(filter) !== -1;
+          } else if (onTwoColumnsData[0] instanceof Date && typeof onTwoColumnsData[1] === 'object') {
+            dataObj1 = onTwoColumnsData[1];
+            isMatched =
+              this.datePipe.transform(onTwoColumnsData[0]).toLowerCase().indexOf(filter) !== -1 ||
+              (dataObj1[dataObj1.SearchSortField]
+                ? (dataObj1[dataObj1.SearchSortField] as string).toLowerCase().indexOf(filter) !== -1
+                : false);
+          } else if (typeof onTwoColumnsData[0] === 'object' && onTwoColumnsData[1] instanceof Date) {
+            dataObj0 = onTwoColumnsData[0];
+            isMatched =
+              (dataObj0[dataObj0.SearchSortField]
+                ? (dataObj0[dataObj0.SearchSortField] as string).toLowerCase().indexOf(filter) !== -1
+                : false) || this.datePipe.transform(onTwoColumnsData[1]).toLowerCase().indexOf(filter) !== -1;
+          } else if (typeof onTwoColumnsData[0] === 'object' && typeof onTwoColumnsData[1] === 'object') {
+            dataObj0 = onTwoColumnsData[0];
+            dataObj1 = onTwoColumnsData[1];
+            isMatched =
+              (dataObj0[dataObj0.SearchSortField]
+                ? (dataObj0[dataObj0.SearchSortField] as string).toLowerCase().indexOf(filter) !== -1
+                : false) ||
+              (dataObj1[dataObj1.SearchSortField]
+                ? (dataObj1[dataObj1.SearchSortField] as string).toLowerCase().indexOf(filter) !== -1
+                : false);
+          } else {
+            isMatched =
+              onTwoColumnsData[0].toString().toLowerCase().indexOf(filter) !== -1 ||
+              onTwoColumnsData[1].toString().toLowerCase().indexOf(filter) !== -1;
+          }
         }
       }
 
@@ -242,7 +268,9 @@ export class CustomDataGridComponent implements OnInit, OnChanges {
 
   /** Recursive function to fetch SearchSortField value of the object for global filter */
   nestedFilterCheck(search: string, data: any, key: string) {
-    if (data[key] instanceof Date) {
+    if (!data[key]) {
+      search += '';
+    } else if (data[key] instanceof Date) {
       search += this.datePipe.transform(data[key]).toLowerCase();
     } else if (typeof data[key] === 'object') {
       search = this.nestedFilterCheck(search, data[key], data[key].SearchSortField);

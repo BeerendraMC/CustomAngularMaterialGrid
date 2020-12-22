@@ -83,7 +83,7 @@ export class AppComponent implements OnInit {
           name: { Link: emp.name, Description: emp.description, SearchSortField: 'Link' },
           gender: emp.gender,
           phone: emp.phone,
-          dob: new Date(emp.dob),
+          dob: emp.dob ? new Date(emp.dob) : null,
           email: emp.email,
           homeTown: { ...emp.homeTown, SearchSortField: 'name' }
         }));
