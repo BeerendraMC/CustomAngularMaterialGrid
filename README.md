@@ -11,13 +11,13 @@ Navigate to `http://localhost:4200/`. The app will automatically reload if you c
 
 ## Documentation
 
-This component dynamically renders the grid using `GridConfig` as Input array of objects where each object represents the configuration of a column. And two events are exposed as output objects, respective actions can be taken on parent components.
+This component dynamically renders the grid using `GridConfig` as Input array of objects where each object represents the configuration of a column. And three events are exposed as output objects, respective actions can be taken on parent components.
 
 This has capability to integrate with any API response format and each actions can be controlled from parent components.
 
-This component also supports for custom CSS (column level), `hyperlinks` and `dropdown`. On click of hyperlink it emits an event (`OnLinkClick`) with the respective row data object. And on selection change of dropdown it emits an event (`OnSelectionChange`) with the respective row data object and the selected value.
+This component also supports `custom CSS` (column level), `hyperlink`, `hyperlink and description`, `dropdown` and `custom template`. On click of hyperlink it emits an event (`linkClick`) with the respective row data object. And on selection change of dropdown it emits an event (`selectionChange`) with the respective row data object and the selected value. On click of custom template it emits an event (`customTemplateClick`) with the row data.
 
-Here are the GridConfig interface and ColumnType enum:
+Here are the GridConfig, DropdownValue interfaces and ColumnType enum:
 
 ```typescript
 export enum ColumnType {
@@ -25,7 +25,8 @@ export enum ColumnType {
   Date,
   Link,
   Dropdown,
-  LinkAndDescription
+  LinkAndDescription,
+  CustomTemplate
 }
 
 export interface GridConfig {
@@ -34,8 +35,14 @@ export interface GridConfig {
   columnType: ColumnType;
   style?: {};
   sort?: boolean;
-  dropdownValues?: Array<{ value: any; viewValue: any }>;
+  dropdownValues?: DropdownValue[];
   align?: 'right' | 'center';
+  customTemplate?: TemplateRef<any>;
+}
+
+export interface DropdownValue {
+  value: string | number;
+  viewValue: string | number;
 }
 ```
 
@@ -48,26 +55,55 @@ export interface GridConfig {
 - `sort`: represents whether the sort option is required on the column or not (defaults to false)
 - `dropdownValues`: an array of objects representing the dropdown options
 - `align`: represents the column alignment (defaults to left)
+- `customTemplate`: represents the reference to the custom template
 
 ### Sample Configuration array
 
 ```typescript
 gridConfiguration: GridConfig[] = [
-  { name: 'id', label: 'Id', columnType: ColumnType.Text, sort: true },
-  { name: 'name', label: 'Name', columnType: ColumnType.Link, sort: true },
+  { name: 'id', label: 'Id', columnType: ColumnType.Text, sort: true, style: { width: '5%' } },
+  { name: 'name', label: 'Name', columnType: ColumnType.LinkAndDescription, sort: true, style: { width: '25%' } },
   {
     name: 'gender',
     label: 'Gender',
     columnType: ColumnType.Dropdown,
     sort: true,
+    style: { width: '100px' },
     dropdownValues: [
       { value: 'male', viewValue: 'Male' },
       { value: 'female', viewValue: 'Female' }
     ]
   },
-  { name: 'phone', label: 'Phone', columnType: ColumnType.Text, sort: true },
-  { name: 'dob', label: 'DOB', columnType: ColumnType.Date, sort: true, align: 'right' },
-  { name: 'email', label: 'Email', columnType: ColumnType.Text, align: 'center' }
+  {
+    name: 'phone',
+    label: 'Phone',
+    columnType: ColumnType.Text,
+    sort: true,
+    style: { width: '10%' }
+  },
+  {
+    name: 'dob',
+    label: 'DOB',
+    columnType: ColumnType.Date,
+    sort: true,
+    align: 'right',
+    style: { width: '15%' }
+  },
+  {
+    name: 'email',
+    label: 'Email',
+    columnType: ColumnType.Text,
+    align: 'center',
+    style: { width: '15%' }
+  },
+  {
+    name: 'homeTown',
+    label: 'Home Town',
+    columnType: ColumnType.CustomTemplate,
+    customTemplate: this.homeTownTemplate,
+    sort: true,
+    style: { width: '15%' }
+  }
 ]
 ```
 
@@ -75,11 +111,13 @@ gridConfiguration: GridConfig[] = [
 
 - Sort on individual column and default sort option
 - Search (Globally or on a particular column or on any two columns. For global filter you must pass ‘globalFilter’ string to the ‘onColumn’ property of ‘searchOption’ input object)
-- Pagination
+- Optional pagination
 - Configurable page size options
 - Vertical scroll bar if the user selects more than the given no of rows per page (that number is configurable). When the user selects 20 rows per page from the page size options the height of the grid increases but our customer wanted to freeze the height to display a certain no of rows (10 or 5) and introduce a vertical scroll if the user wants to view more rows than that number.
 - Hyperlink
+- Hyperlink and description
 - Dropdown
+- Custom template
 - Custom CSS (column level)
-- Spinner (while making api call)
+- Spinner (while fetching data from the api)
 - Configurable message to display when there is no data (defaults to ‘No data available.’)
