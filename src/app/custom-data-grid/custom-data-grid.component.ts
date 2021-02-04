@@ -67,21 +67,21 @@ export class CustomDataGridComponent implements OnInit, OnChanges {
    * Event emitted when any one of the links in the grid has been clicked by the user.
    * Emits the clicked row data.
    */
-  @Output() OnLinkClick: EventEmitter<any> = new EventEmitter<any>();
+  @Output() linkClick: EventEmitter<any> = new EventEmitter<any>();
 
   /**
    * Event emitted when the selected value of any one of the dropdowns in the grid
    * has been changed by the user.
    * Emits an object which contains clicked row data and selected value.
    */
-  @Output() OnSelectionChange: EventEmitter<any> = new EventEmitter<any>();
+  @Output() selectionChange: EventEmitter<any> = new EventEmitter<any>();
 
   /**
    * Event emitted when any one of the custom template's element in the grid has been clicked by the user
    * if it is binding to click event.
    * Emits the clicked row data.
    */
-  @Output() OnCustomTemplateClick: EventEmitter<any> = new EventEmitter<any>();
+  @Output() customTemplateClick: EventEmitter<any> = new EventEmitter<any>();
 
   /** Reference to the MatPaginator. */
   @ViewChild(MatPaginator, { static: false }) paginator: MatPaginator;
@@ -170,7 +170,7 @@ export class CustomDataGridComponent implements OnInit, OnChanges {
    * @param element
    */
   emitClickedElement(element: any) {
-    this.OnLinkClick.emit(element);
+    this.linkClick.emit(element);
   }
 
   /**
@@ -178,7 +178,7 @@ export class CustomDataGridComponent implements OnInit, OnChanges {
    * @param element
    */
   emitClickedElementForCustomTemplate(element: any) {
-    this.OnCustomTemplateClick.emit(element);
+    this.customTemplateClick.emit(element);
   }
 
   /**
@@ -188,7 +188,7 @@ export class CustomDataGridComponent implements OnInit, OnChanges {
    */
   emitSelectedElement(element: any, event: MatSelectChange) {
     const emitData = { element, selectedValue: event.value };
-    this.OnSelectionChange.emit(emitData);
+    this.selectionChange.emit(emitData);
   }
 
   /** Searches the filter string in different types of data and returns boolean. */
