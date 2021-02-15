@@ -92,6 +92,7 @@ export class AppComponent implements OnInit {
         }, 2000);
       },
       err => {
+        this.Employees = []; // This stops the loader and shows no data message on the grid
         console.error(err);
       }
     );
