@@ -102,7 +102,7 @@ describe('CustomDataGridComponent', () => {
 
   it("should emit clicked link's row data", done => {
     let clickedRow: any;
-    component.OnLinkClick.subscribe(rowData => (clickedRow = rowData));
+    component.linkClick.subscribe(rowData => (clickedRow = rowData));
     component.ngOnChanges();
     fixture.detectChanges();
 
@@ -120,7 +120,7 @@ describe('CustomDataGridComponent', () => {
 
   it('should emit selection changed row data with selected value', done => {
     let selectionChangedData: { element: any; selectedValue: string };
-    component.OnSelectionChange.subscribe(data => (selectionChangedData = data));
+    component.selectionChange.subscribe(data => (selectionChangedData = data));
     component.ngOnChanges();
     fixture.detectChanges();
 
