@@ -24,3 +24,8 @@ export interface DropdownValue {
   value: string | number;
   viewValue: string | number;
 }
+
+export interface CustomTemplateEmitData {
+  column: string;
+  rowData: any;
+}

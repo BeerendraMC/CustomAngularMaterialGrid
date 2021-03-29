@@ -4,7 +4,7 @@ import { MatSort, Sort, SortDirection } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSelectChange } from '@angular/material/select';
-import { ColumnType, GridConfig } from '../models/custom-data-grid';
+import { ColumnType, CustomTemplateEmitData, GridConfig } from '../models/custom-data-grid';
 
 /**
  * A configurable and re-usable grid component built on Angular Material data table
@@ -174,11 +174,11 @@ export class CustomDataGridComponent implements OnInit, OnChanges {
   }
 
   /**
-   * Emits clicked row data for custom template.
+   * Emits an object of type CustomTemplateEmitData.
    * @param element
    */
-  emitClickedElementForCustomTemplate(element: any) {
-    this.customTemplateClick.emit(element);
+  emitClickedElementForCustomTemplate(data: CustomTemplateEmitData) {
+    this.customTemplateClick.emit(data);
   }
 
   /**

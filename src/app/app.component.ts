@@ -1,5 +1,5 @@
 import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
-import { GridConfig, ColumnType } from './models/custom-data-grid';
+import { GridConfig, ColumnType, CustomTemplateEmitData } from './models/custom-data-grid';
 import { EmployeeService } from './employee.service';
 import { IEmployee } from './models/employee';
 
@@ -15,8 +15,10 @@ export class AppComponent implements OnInit {
   selectedEmployee: IEmployee;
   GenderChangeData: any;
   clickedEmployee: IEmployee;
+  customTemplateColumn: string;
 
   @ViewChild('homeTownTemplate', { static: true }) homeTownTemplate: TemplateRef<any>;
+  @ViewChild('actionTemplate', { static: true }) actionTemplate: TemplateRef<any>;
 
   constructor(private employeeService: EmployeeService) {}
 
@@ -28,7 +30,7 @@ export class AppComponent implements OnInit {
   setGridConfigs() {
     this.gridConfiguration = [
       { name: 'id', label: 'Id', columnType: ColumnType.Text, sort: true, style: { width: '5%' } },
-      { name: 'name', label: 'Name', columnType: ColumnType.LinkAndDescription, sort: true, style: { width: '25%' } },
+      { name: 'name', label: 'Name', columnType: ColumnType.LinkAndDescription, sort: true, style: { width: '20%' } },
       {
         name: 'gender',
         label: 'Gender',
@@ -69,10 +71,18 @@ export class AppComponent implements OnInit {
         customTemplate: this.homeTownTemplate,
         sort: true,
         style: { width: '15%' }
+      },
+      {
+        name: 'action',
+        label: 'Action',
+        columnType: ColumnType.CustomTemplate,
+        customTemplate: this.actionTemplate,
+        sort: false,
+        style: { width: '5%' }
       }
     ];
 
-    this.displayedColumns = ['id', 'name', 'gender', 'phone', 'dob', 'email', 'homeTown'];
+    this.displayedColumns = ['id', 'name', 'gender', 'phone', 'dob', 'email', 'homeTown', 'action'];
   }
 
   getEmps() {
@@ -106,7 +116,16 @@ export class AppComponent implements OnInit {
     this.GenderChangeData = data;
   }
 
-  launchIconClickHandler(emp: IEmployee) {
-    this.clickedEmployee = emp;
+  onCustomTemplateClick(data: CustomTemplateEmitData) {
+    switch (data.column) {
+      case 'homeTown':
+        this.customTemplateColumn = 'homeTown';
+        this.clickedEmployee = data.rowData as IEmployee;
+        break;
+      case 'action':
+        this.customTemplateColumn = 'action';
+        this.clickedEmployee = data.rowData as IEmployee;
+        break;
+    }
   }
 }

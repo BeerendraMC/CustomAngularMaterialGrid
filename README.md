@@ -15,7 +15,7 @@ This component dynamically renders the grid using `GridConfig` as Input array of
 
 This has capability to integrate with any API response format and each actions can be controlled from parent components.
 
-This component also supports `custom CSS` (column level), `hyperlink`, `hyperlink and description`, `dropdown` and `custom template`. On click of hyperlink it emits an event (`linkClick`) with the respective row data object. And on selection change of dropdown it emits an event (`selectionChange`) with the respective row data object and the selected value. On click of custom template it emits an event (`customTemplateClick`) with the row data.
+This component also supports `custom CSS` (column level), `hyperlink`, `hyperlink and description`, `dropdown` and `custom templates`. On click of hyperlink it emits an event (`linkClick`) with the respective row data object. And on selection change of dropdown it emits an event (`selectionChange`) with the respective row data object and the selected value. On click of custom template it emits an event (`customTemplateClick`) with the column name that is being passed in the template and row data.
 
 Here are the GridConfig, DropdownValue interfaces and ColumnType enum:
 
@@ -44,6 +44,11 @@ export interface DropdownValue {
   value: string | number;
   viewValue: string | number;
 }
+
+export interface CustomTemplateEmitData {
+  column: string;
+  rowData: any;
+}
 ```
 
 ### `GridConfig` properties:
@@ -62,7 +67,7 @@ export interface DropdownValue {
 ```typescript
 gridConfiguration: GridConfig[] = [
   { name: 'id', label: 'Id', columnType: ColumnType.Text, sort: true, style: { width: '5%' } },
-  { name: 'name', label: 'Name', columnType: ColumnType.LinkAndDescription, sort: true, style: { width: '25%' } },
+  { name: 'name', label: 'Name', columnType: ColumnType.LinkAndDescription, sort: true, style: { width: '20%' } },
   {
     name: 'gender',
     label: 'Gender',
@@ -103,6 +108,14 @@ gridConfiguration: GridConfig[] = [
     customTemplate: this.homeTownTemplate,
     sort: true,
     style: { width: '15%' }
+  },
+  {
+    name: 'action',
+    label: 'Action',
+    columnType: ColumnType.CustomTemplate,
+    customTemplate: this.actionTemplate,
+    sort: false,
+    style: { width: '5%' }
   }
 ]
 ```
@@ -117,7 +130,7 @@ gridConfiguration: GridConfig[] = [
 - Hyperlink
 - Hyperlink and description
 - Dropdown
-- Custom template
+- Multiple Custom Template columns with click events
 - Custom CSS (column level)
 - Spinner (while fetching data from the api)
 - Configurable message to display when there is no data (defaults to ‘No data available.’)

@@ -12,19 +12,19 @@
     }"
     (linkClick)="onNameClick($event)"
     (selectionChange)="onGenderChange($event)"
-    (customTemplateClick)="launchIconClickHandler($event)"
+    (customTemplateClick)="onCustomTemplateClick($event)"
   ></app-custom-data-grid>
   <div style="display: flex; justify-content: space-evenly; padding-top: 2%;">
     <div *ngIf="selectedEmployee">
-      <span>Data emitted by OnLinkClick event:</span>
+      <span>Data emitted by linkClick event:</span>
       <pre>{{ selectedEmployee | json }}</pre>
     </div>
     <div *ngIf="GenderChangeData">
-      <span>Data emitted by OnSelectionChange event:</span>
+      <span>Data emitted by selectionChange event:</span>
       <pre>{{ GenderChangeData | json }}</pre>
     </div>
     <div *ngIf="clickedEmployee">
-      <span>Data emitted by OnCustomTemplateClick event:</span>
+      <span>Data emitted by customTemplateClick event from {{ customTemplateColumn }} column:</span>
       <pre>{{ clickedEmployee | json }}</pre>
     </div>
   </div>
@@ -33,8 +33,18 @@
 <ng-template #homeTownTemplate let-rowData="rowData" let-clickEventHandler="clickEventHandler">
   <span class="home-town-container">
     <span>{{ rowData?.homeTown?.name }}</span>
-    <a [href]="rowData?.homeTown?.link" target="_blank" (click)="clickEventHandler(rowData)">
+    <a
+      [href]="rowData?.homeTown?.link"
+      target="_blank"
+      (click)="clickEventHandler({ column: 'homeTown', rowData: rowData })"
+    >
       <mat-icon>launch</mat-icon>
     </a>
   </span>
+</ng-template>
+
+<ng-template #actionTemplate let-rowData="rowData" let-clickEventHandler="clickEventHandler">
+  <button mat-icon-button (click)="clickEventHandler({ column: 'action', rowData: rowData })">
+    <mat-icon>more_vert</mat-icon>
+  </button>
 </ng-template>
