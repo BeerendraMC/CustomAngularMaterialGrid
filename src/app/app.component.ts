@@ -1,36 +1,50 @@
 import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { GridConfig, ColumnType, CustomTemplateEmitData } from './models/custom-data-grid';
 import { EmployeeService } from './employee.service';
-import { IEmployee } from './models/employee';
+import { IEmployee } from './models';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css']
+  styleUrls: ['./app.component.scss']
 })
 export class AppComponent implements OnInit {
-  gridConfiguration: GridConfig[];
-  displayedColumns: string[];
-  Employees: IEmployee[];
-  selectedEmployee: IEmployee;
+  gridConfiguration!: GridConfig[];
+  displayedColumns!: string[];
+  Employees!: IEmployee[];
+  selectedEmployee!: IEmployee;
   GenderChangeData: any;
-  clickedEmployee: IEmployee;
-  customTemplateColumn: string;
+  clickedEmployee!: IEmployee;
+  customTemplateColumn!: string;
 
-  @ViewChild('homeTownTemplate', { static: true }) homeTownTemplate: TemplateRef<any>;
-  @ViewChild('actionTemplate', { static: true }) actionTemplate: TemplateRef<any>;
+  @ViewChild('homeTownTemplate', { static: true })
+  homeTownTemplate!: TemplateRef<any>;
+  @ViewChild('actionTemplate', { static: true })
+  actionTemplate!: TemplateRef<any>;
 
   constructor(private employeeService: EmployeeService) {}
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.setGridConfigs();
     this.getEmps();
   }
 
-  setGridConfigs() {
+  setGridConfigs(): void {
     this.gridConfiguration = [
-      { name: 'id', label: 'Id', columnType: ColumnType.Text, sort: true, style: { width: '5%' } },
-      { name: 'name', label: 'Name', columnType: ColumnType.LinkAndDescription, sort: true, style: { width: '20%' } },
+      {
+        name: 'id',
+        label: 'Id',
+        columnType: ColumnType.Text,
+        sort: true,
+        style: { width: '5%' }
+      },
+      {
+        name: 'name',
+        label: 'Name',
+        columnType: ColumnType.LinkAndDescription,
+        sort: true,
+        style: { width: '20%' }
+      },
       {
         name: 'gender',
         label: 'Gender',
@@ -82,21 +96,28 @@ export class AppComponent implements OnInit {
       }
     ];
 
-    this.displayedColumns = ['id', 'name', 'gender', 'phone', 'dob', 'email', 'homeTown', 'action'];
+    this.displayedColumns = ['name', 'gender', 'phone', 'dob', 'email', 'homeTown', 'action'];
   }
 
-  getEmps() {
+  getEmps(): void {
     this.employeeService.getEmployees().subscribe(
       (data: IEmployee[]) => {
-        const empData: IEmployee[] = data.map(emp => ({
-          id: emp.id,
-          name: { Link: emp.name, Description: emp.description, SearchSortField: 'Link' },
-          gender: emp.gender,
-          phone: emp.phone,
-          dob: emp.dob ? new Date(emp.dob) : null,
-          email: emp.email,
-          homeTown: { ...emp.homeTown, SearchSortField: 'name' }
-        }));
+        const empData: IEmployee[] = data.map(
+          emp =>
+            ({
+              id: emp.id,
+              name: {
+                Link: emp.name,
+                Description: emp.description,
+                SearchSortField: 'Link'
+              },
+              gender: emp.gender,
+              phone: emp.phone,
+              dob: emp.dob ? new Date(emp.dob) : null,
+              email: emp.email,
+              homeTown: { ...emp.homeTown, SearchSortField: 'name' }
+            } as IEmployee)
+        );
         setTimeout(() => {
           this.Employees = empData;
         }, 2000);
@@ -108,15 +129,15 @@ export class AppComponent implements OnInit {
     );
   }
 
-  onNameClick(emp: IEmployee) {
+  onNameClick(emp: IEmployee): void {
     this.selectedEmployee = emp;
   }
 
-  onGenderChange(data: any) {
+  onGenderChange(data: any): void {
     this.GenderChangeData = data;
   }
 
-  onCustomTemplateClick(data: CustomTemplateEmitData) {
+  onCustomTemplateClick(data: CustomTemplateEmitData): void {
     switch (data.column) {
       case 'homeTown':
         this.customTemplateColumn = 'homeTown';

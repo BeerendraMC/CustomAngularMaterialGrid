@@ -10,13 +10,13 @@ import { IEmployee } from './models/employee';
 export class EmployeeService {
   baseUrl = 'http://localhost:3000/';
 
-  constructor(private _http: HttpClient) {}
+  constructor(private http: HttpClient) {}
 
   getEmployees(): Observable<IEmployee[]> {
-    return this._http.get<IEmployee[]>(`${this.baseUrl}employees`).pipe(catchError(this.handleError));
+    return this.http.get<IEmployee[]>(`${this.baseUrl}employees`).pipe(catchError(this.handleError));
   }
 
-  private handleError(errorResponse: HttpErrorResponse) {
+  private handleError(errorResponse: HttpErrorResponse): Observable<any> {
     return throwError(errorResponse);
   }
 }

@@ -18,7 +18,10 @@
       "phone": 8956236985,
       "dob": "1967/8/19",
       "email": "satya.n@gmail.com",
-      "homeTown": { "name": "Hyderabad, Telangana", "link": "https://en.wikipedia.org/wiki/Hyderabad" }
+      "homeTown": {
+        "name": "Hyderabad, Telangana",
+        "link": "https://en.wikipedia.org/wiki/Hyderabad"
+      }
     },
     {
       "id": 3,
@@ -28,7 +31,10 @@
       "phone": 9966332255,
       "dob": "1963/5/27",
       "email": "shantanu.n@gmail.com",
-      "homeTown": { "name": "Hyderabad, Telangana", "link": "https://en.wikipedia.org/wiki/Hyderabad" }
+      "homeTown": {
+        "name": "Hyderabad, Telangana",
+        "link": "https://en.wikipedia.org/wiki/Hyderabad"
+      }
     },
     {
       "id": 4,
@@ -88,7 +94,10 @@
       "phone": 8876765491,
       "dob": "1958/6/27",
       "email": "sanjay.m@gmail.com",
-      "homeTown": { "name": "Kanpur, Uttar Pradesh", "link": "https://en.wikipedia.org/wiki/Kanpur" }
+      "homeTown": {
+        "name": "Kanpur, Uttar Pradesh",
+        "link": "https://en.wikipedia.org/wiki/Kanpur"
+      }
     },
     {
       "id": 10,
@@ -98,7 +107,10 @@
       "phone": 7006509083,
       "dob": "1946/8/20",
       "email": "narayana.m@gmail.com",
-      "homeTown": { "name": "Shidlaghatta, Karnataka", "link": "https://en.wikipedia.org/wiki/Shidlaghatta" }
+      "homeTown": {
+        "name": "Shidlaghatta, Karnataka",
+        "link": "https://en.wikipedia.org/wiki/Shidlaghatta"
+      }
     },
     {
       "id": 11,

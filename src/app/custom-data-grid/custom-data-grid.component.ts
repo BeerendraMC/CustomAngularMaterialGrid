@@ -4,7 +4,7 @@ import { MatSort, Sort, SortDirection } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSelectChange } from '@angular/material/select';
-import { ColumnType, CustomTemplateEmitData, GridConfig } from '../models/custom-data-grid';
+import { ColumnType, CustomTemplateEmitData, GridConfig } from '../models';
 
 /**
  * A configurable and re-usable grid component built on Angular Material data table
@@ -13,17 +13,17 @@ import { ColumnType, CustomTemplateEmitData, GridConfig } from '../models/custom
 @Component({
   selector: 'app-custom-data-grid',
   templateUrl: './custom-data-grid.component.html',
-  styleUrls: ['./custom-data-grid.component.css']
+  styleUrls: ['./custom-data-grid.component.scss']
 })
 export class CustomDataGridComponent implements OnInit, OnChanges {
   /** Main grid configuration array, where each object represents the configurations of one column. */
-  @Input() gridConfig: GridConfig[];
+  @Input() gridConfig!: GridConfig[];
 
   /** The set of columns to be displayed. */
-  @Input() displayedColumns: string[];
+  @Input() displayedColumns!: string[];
 
   /** The table's source of data. */
-  @Input() dataSource: Array<any>;
+  @Input() dataSource!: Array<any>;
 
   /** Optional default sort column details - name and sort direction. */
   @Input() defaultSortColumn?: { name: string; sortDirection: SortDirection };
@@ -45,7 +45,7 @@ export class CustomDataGridComponent implements OnInit, OnChanges {
    * To have the global filter, set onColumn: 'globalFilter'.
    */
   @Input() searchOption?: {
-    onColumn: string;
+    onColumn?: string;
     onTwoColumns?: string[];
     searchTextBoxLabel: string;
     searchBoxStyle?: {};
@@ -61,7 +61,13 @@ export class CustomDataGridComponent implements OnInit, OnChanges {
    * The flag to turn pagination on or off.
    * Defaults to on.
    */
-  @Input() requirePagination: boolean = true;
+  @Input() requirePagination = true;
+
+  /**
+   * Freeze first and last columns for mobile devices (max-width: 1023px).
+   * Defaults to false.
+   */
+  @Input() freezeFirstAndLastColumns = false;
 
   /**
    * Event emitted when any one of the links in the grid has been clicked by the user.
@@ -84,22 +90,22 @@ export class CustomDataGridComponent implements OnInit, OnChanges {
   @Output() customTemplateClick: EventEmitter<any> = new EventEmitter<any>();
 
   /** Reference to the MatPaginator. */
-  @ViewChild(MatPaginator, { static: false }) paginator: MatPaginator;
+  @ViewChild(MatPaginator, { static: false }) paginator!: MatPaginator;
 
   /** Reference to the MatSort. */
-  @ViewChild(MatSort, { static: true }) sort: MatSort;
+  @ViewChild(MatSort, { static: true }) sort!: MatSort;
 
-  gridDataSource: MatTableDataSource<any>;
-  tableScrollStyle: {};
-  private sortState: Sort;
+  gridDataSource!: MatTableDataSource<any>;
+  tableScrollStyle!: {};
+  private sortState!: Sort;
 
-  get ColumnType() {
+  get ColumnType(): any {
     return ColumnType;
   }
 
   constructor(private datePipe: DatePipe) {}
 
-  ngOnInit() {
+  ngOnInit(): void {
     if (this.defaultSortColumn) {
       this.sortState = {
         active: this.defaultSortColumn.name,
@@ -121,7 +127,7 @@ export class CustomDataGridComponent implements OnInit, OnChanges {
     }
   }
 
-  ngOnChanges() {
+  ngOnChanges(): void {
     if (this.dataSource) {
       this.gridDataSource = new MatTableDataSource(this.dataSource);
       if (this.requirePagination) {
@@ -154,9 +160,9 @@ export class CustomDataGridComponent implements OnInit, OnChanges {
 
   /**
    * Applies filter by filtering the grid data
-   * @param event
+   * @param event keyup event
    */
-  applyFilter(event: Event) {
+  applyFilter(event: Event): void {
     const filterValue = (event.target as HTMLInputElement).value;
     this.gridDataSource.filter = filterValue.trim().toLowerCase();
 
@@ -167,26 +173,26 @@ export class CustomDataGridComponent implements OnInit, OnChanges {
 
   /**
    * Emits clicked row data.
-   * @param element
+   * @param element row data
    */
-  emitClickedElement(element: any) {
+  emitClickedElement(element: any): void {
     this.linkClick.emit(element);
   }
 
   /**
    * Emits an object of type CustomTemplateEmitData.
-   * @param element
+   * @param data object of type CustomTemplateEmitData
    */
-  emitClickedElementForCustomTemplate(data: CustomTemplateEmitData) {
+  emitClickedElementForCustomTemplate(data: CustomTemplateEmitData): void {
     this.customTemplateClick.emit(data);
   }
 
   /**
    * Emits an object which includes selected row data and selected value.
-   * @param element
-   * @param event
+   * @param element row data
+   * @param event event of type MatSelectChange
    */
-  emitSelectedElement(element: any, event: MatSelectChange) {
+  emitSelectedElement(element: any, event: MatSelectChange): void {
     const emitData = { element, selectedValue: event.value };
     this.selectionChange.emit(emitData);
   }
@@ -197,7 +203,7 @@ export class CustomDataGridComponent implements OnInit, OnChanges {
     if (!data || !filter) {
       returnValue = false;
     } else if (data instanceof Date) {
-      returnValue = this.datePipe.transform(data).toLowerCase().indexOf(filter) !== -1;
+      returnValue = this.datePipe.transform(data)?.toLowerCase().indexOf(filter) !== -1;
     } else if (typeof data === 'object') {
       returnValue = data[data.SearchSortField]
         ? (data[data.SearchSortField] as string).toLowerCase().indexOf(filter) !== -1
@@ -214,25 +220,26 @@ export class CustomDataGridComponent implements OnInit, OnChanges {
    */
   customFilterPredicate(): (data: any, filter: string) => boolean {
     const myFilterPredicate = (data: any, filter: string) => {
-      let isMatched: boolean;
-      if (this.searchOption.onColumn) {
+      let isMatched = false;
+      if (this.searchOption?.onColumn) {
         isMatched = this.isSearchTermMatched(data[this.searchOption.onColumn], filter);
-      } else if (this.searchOption.onTwoColumns && this.searchOption.onTwoColumns.length > 1) {
+      } else if (this.searchOption?.onTwoColumns && this.searchOption.onTwoColumns.length > 1) {
         const onTwoColumnsData = [data[this.searchOption.onTwoColumns[0]], data[this.searchOption.onTwoColumns[1]]];
         if (!onTwoColumnsData[0]) {
           isMatched = this.isSearchTermMatched(onTwoColumnsData[1], filter);
         } else if (!onTwoColumnsData[1]) {
           isMatched = this.isSearchTermMatched(onTwoColumnsData[0], filter);
         } else {
+          // tslint:disable-next-line: one-variable-per-declaration
           let dataObj0, dataObj1;
           if (onTwoColumnsData[0] instanceof Date && onTwoColumnsData[1] instanceof Date) {
             isMatched =
-              this.datePipe.transform(onTwoColumnsData[0]).toLowerCase().indexOf(filter) !== -1 ||
-              this.datePipe.transform(onTwoColumnsData[1]).toLowerCase().indexOf(filter) !== -1;
+              this.datePipe.transform(onTwoColumnsData[0])?.toLowerCase().indexOf(filter) !== -1 ||
+              this.datePipe.transform(onTwoColumnsData[1])?.toLowerCase().indexOf(filter) !== -1;
           } else if (onTwoColumnsData[0] instanceof Date && typeof onTwoColumnsData[1] === 'object') {
             dataObj1 = onTwoColumnsData[1];
             isMatched =
-              this.datePipe.transform(onTwoColumnsData[0]).toLowerCase().indexOf(filter) !== -1 ||
+              this.datePipe.transform(onTwoColumnsData[0])?.toLowerCase().indexOf(filter) !== -1 ||
               (dataObj1[dataObj1.SearchSortField]
                 ? (dataObj1[dataObj1.SearchSortField] as string).toLowerCase().indexOf(filter) !== -1
                 : false);
@@ -241,7 +248,7 @@ export class CustomDataGridComponent implements OnInit, OnChanges {
             isMatched =
               (dataObj0[dataObj0.SearchSortField]
                 ? (dataObj0[dataObj0.SearchSortField] as string).toLowerCase().indexOf(filter) !== -1
-                : false) || this.datePipe.transform(onTwoColumnsData[1]).toLowerCase().indexOf(filter) !== -1;
+                : false) || this.datePipe.transform(onTwoColumnsData[1])?.toLowerCase().indexOf(filter) !== -1;
           } else if (typeof onTwoColumnsData[0] === 'object' && typeof onTwoColumnsData[1] === 'object') {
             dataObj0 = onTwoColumnsData[0];
             dataObj1 = onTwoColumnsData[1];
@@ -267,11 +274,11 @@ export class CustomDataGridComponent implements OnInit, OnChanges {
   }
 
   /** Recursive function to fetch SearchSortField value of the object for global filter */
-  nestedFilterCheck(search: string, data: any, key: string) {
+  nestedFilterCheck(search: string, data: any, key: string): string {
     if (!data[key]) {
       search += '';
     } else if (data[key] instanceof Date) {
-      search += this.datePipe.transform(data[key]).toLowerCase();
+      search += this.datePipe.transform(data[key])?.toLowerCase();
     } else if (typeof data[key] === 'object') {
       search = this.nestedFilterCheck(search, data[key], data[key].SearchSortField);
       /**
@@ -289,8 +296,8 @@ export class CustomDataGridComponent implements OnInit, OnChanges {
   }
 
   /**
-   * Returns a custom global filter predicate function which lets us filter gird data globally
-   * @returns filterPredicate
+   * Returns a custom global filter predicate function which lets us filter gird data globally.
+   * @returns filterPredicate.
    */
   customGlobalFilterPredicate(): (data: any, filter: string) => boolean {
     const myFilterPredicate = (data: any, filter: string) => {
@@ -303,5 +310,27 @@ export class CustomDataGridComponent implements OnInit, OnChanges {
     };
 
     return myFilterPredicate;
+  }
+
+  /**
+   * Returns boolean flag which indicates whether the table headers should be sticky or not.
+   * @returns boolean.
+   */
+  isStickyHeader(): boolean {
+    if (this.gridDataSource && this.verticalScrollOffsetInRows) {
+      return (
+        (this.gridDataSource?.paginator?.pageSize ?? 0) > this.verticalScrollOffsetInRows ||
+        (!this.requirePagination && this.dataSource?.length > this.verticalScrollOffsetInRows)
+      );
+    }
+    return false;
+  }
+
+  /**
+   * Returns the right column align class name.
+   * @returns string
+   */
+  getColumnAlignClass(align: string, el: string): string {
+    return align ? `${el}-${align}` : '';
   }
 }

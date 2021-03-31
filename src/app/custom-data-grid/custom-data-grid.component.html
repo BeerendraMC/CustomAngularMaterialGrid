@@ -1,33 +1,37 @@
 <div class="mat-elevation-z8">
-  <mat-form-field class="search-field" *ngIf="searchOption" [ngStyle]="searchOption.searchBoxStyle">
-    <mat-label>{{ searchOption.searchTextBoxLabel }}</mat-label>
+  <mat-form-field class="search-field" *ngIf="searchOption" [ngStyle]="searchOption?.searchBoxStyle || null">
+    <mat-label>{{ searchOption?.searchTextBoxLabel }}</mat-label>
     <input matInput (keyup)="applyFilter($event)" autocomplete="off" />
     <mat-icon matPrefix>search</mat-icon>
   </mat-form-field>
   <div
-    [ngStyle]="
-      (gridDataSource?.paginator?.pageSize > verticalScrollOffsetInRows ||
-        (!requirePagination && dataSource?.length > verticalScrollOffsetInRows)) &&
-      tableScrollStyle
-    "
+    [ngStyle]="isStickyHeader() ? tableScrollStyle : null"
+    [ngClass]="{
+      'sticky-first-last-columns': (dataSource?.length || 0) > 0 && freezeFirstAndLastColumns
+    }"
   >
     <table mat-table [dataSource]="gridDataSource" matSort>
-      <ng-container *ngFor="let column of gridConfig" [matColumnDef]="column.name">
+      <ng-container
+        *ngFor="let column of gridConfig"
+        [matColumnDef]="column.name"
+        [sticky]="freezeFirstAndLastColumns && column.name === displayedColumns[0]"
+        [stickyEnd]="freezeFirstAndLastColumns && column.name === displayedColumns[(displayedColumns?.length || 0) - 1]"
+      >
         <th
           mat-header-cell
           *matHeaderCellDef
           mat-sort-header
           [disabled]="!column.sort"
           disableClear
-          [ngClass]="column.align ? 'th-' + column.align : ''"
+          [ngClass]="getColumnAlignClass(column.align || '', 'th')"
         >
           {{ column.label }}
         </th>
         <td
           mat-cell
           *matCellDef="let element"
-          [ngStyle]="column.style"
-          [ngClass]="column.align ? 'td-' + column.align : ''"
+          [ngStyle]="column.style || null"
+          [ngClass]="getColumnAlignClass(column.align || '', 'td')"
         >
           <span
             *ngIf="column.columnType === ColumnType.Date"
@@ -49,7 +53,7 @@
           </a>
           <mat-form-field
             class="dropdown-field"
-            [ngStyle]="column.style"
+            [ngStyle]="column.style || null"
             *ngIf="column.columnType === ColumnType.Dropdown"
           >
             <mat-select [value]="element[column.name]" (selectionChange)="emitSelectedElement(element, $event)">
@@ -89,7 +93,7 @@
           >
             <ng-container
               *ngTemplateOutlet="
-                column.customTemplate;
+                column.customTemplate || null;
                 context: {
                   rowData: element,
                   clickEventHandler: this.emitClickedElementForCustomTemplate.bind(this)
@@ -100,14 +104,7 @@
         </td>
       </ng-container>
 
-      <tr
-        mat-header-row
-        *matHeaderRowDef="
-          displayedColumns;
-          sticky: gridDataSource?.paginator?.pageSize > verticalScrollOffsetInRows ||
-            (!requirePagination && dataSource?.length > verticalScrollOffsetInRows)
-        "
-      ></tr>
+      <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: isStickyHeader()"></tr>
       <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
     </table>
   </div>
