@@ -1,6 +1,6 @@
 # CustomMaterialGrid
 
-CustomDataGrid is a configurable and re-usable component built on angular 8 using [Angular Material data table](https://material.angular.io/components/table/overview).
+CustomDataGrid is a configurable and re-usable component built on angular using [Angular Material data table](https://material.angular.io/components/table/overview).
 
 ## How to run
 
