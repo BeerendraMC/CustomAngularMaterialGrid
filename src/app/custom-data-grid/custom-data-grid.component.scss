@@ -78,6 +78,7 @@ td.mat-cell .description {
   color: rgba(0, 0, 0, 0.6);
   font-size: 12px;
   letter-spacing: 0.41px;
+  line-height: 16px;
 }
 
 .dropdown-field.mat-form-field ::ng-deep .mat-form-field-underline,
@@ -86,15 +87,28 @@ td.mat-cell .description {
 }
 
 .dropdown-field.mat-form-field.mat-focused ::ng-deep .mat-form-field-ripple,
-.dropdown-field.mat-form-field.mat-form-field-invalid ::ng-deep .mat-form-field-ripple,
-:host ::ng-deep .mat-paginator-page-size .mat-form-field.mat-focused .mat-form-field-ripple,
-:host ::ng-deep .mat-paginator-page-size .mat-form-field.mat-form-field-invalid .mat-form-field-ripple {
+.dropdown-field.mat-form-field.mat-form-field-invalid
+  ::ng-deep
+  .mat-form-field-ripple,
+:host
+  ::ng-deep
+  .mat-paginator-page-size
+  .mat-form-field.mat-focused
+  .mat-form-field-ripple,
+:host
+  ::ng-deep
+  .mat-paginator-page-size
+  .mat-form-field.mat-form-field-invalid
+  .mat-form-field-ripple {
   background-color: unset;
   transform: unset;
   transition: unset;
 }
 
-:host ::ng-deep .dropdown-field.mat-form-field-appearance-legacy .mat-form-field-wrapper {
+:host
+  ::ng-deep
+  .dropdown-field.mat-form-field-appearance-legacy
+  .mat-form-field-wrapper {
   padding-bottom: 0.92em;
 }
 

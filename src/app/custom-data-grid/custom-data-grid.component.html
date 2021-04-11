@@ -1,21 +1,31 @@
 <div class="mat-elevation-z8">
-  <mat-form-field class="search-field" *ngIf="searchOption" [ngStyle]="searchOption?.searchBoxStyle || null">
+  <mat-form-field
+    class="search-field"
+    *ngIf="searchOption"
+    [ngStyle]="searchOption?.searchBoxStyle || null"
+  >
     <mat-label>{{ searchOption?.searchTextBoxLabel }}</mat-label>
-    <input matInput (keyup)="applyFilter($event)" autocomplete="off" />
+    <input matInput #input autocomplete="off" />
     <mat-icon matPrefix>search</mat-icon>
   </mat-form-field>
   <div
     [ngStyle]="isStickyHeader() ? tableScrollStyle : null"
     [ngClass]="{
-      'sticky-first-last-columns': (dataSource?.length || 0) > 0 && freezeFirstAndLastColumns
+      'sticky-first-last-columns':
+        !(dataSource.loading$ | async) && freezeFirstAndLastColumns
     }"
   >
-    <table mat-table [dataSource]="gridDataSource" matSort>
+    <table mat-table [dataSource]="dataSource" matSort>
       <ng-container
         *ngFor="let column of gridConfig"
         [matColumnDef]="column.name"
-        [sticky]="freezeFirstAndLastColumns && column.name === displayedColumns[0]"
-        [stickyEnd]="freezeFirstAndLastColumns && column.name === displayedColumns[(displayedColumns?.length || 0) - 1]"
+        [sticky]="
+          freezeFirstAndLastColumns && column.name === displayedColumns[0]
+        "
+        [stickyEnd]="
+          freezeFirstAndLastColumns &&
+          column.name === displayedColumns[(displayedColumns?.length || 0) - 1]
+        "
       >
         <th
           mat-header-cell
@@ -34,7 +44,7 @@
           [ngClass]="getColumnAlignClass(column.align || '', 'td')"
         >
           <span
-            *ngIf="column.columnType === ColumnType.Date"
+            *ngIf="column.columnType === columnType.Date"
             [ngClass]="{
               'padding-right': column.align === 'right' && column.sort
             }"
@@ -42,7 +52,7 @@
             {{ element[column.name] | date }}
           </span>
           <a
-            *ngIf="column.columnType === ColumnType.Link"
+            *ngIf="column.columnType === columnType.Link"
             tabindex="0"
             (click)="emitClickedElement(element)"
             [ngClass]="{
@@ -54,16 +64,22 @@
           <mat-form-field
             class="dropdown-field"
             [ngStyle]="column.style || null"
-            *ngIf="column.columnType === ColumnType.Dropdown"
+            *ngIf="column.columnType === columnType.Dropdown"
           >
-            <mat-select [value]="element[column.name]" (selectionChange)="emitSelectedElement(element, $event)">
-              <mat-option *ngFor="let item of column.dropdownValues" [value]="item.value">
+            <mat-select
+              [value]="element[column.name]"
+              (selectionChange)="emitSelectedElement(element, $event)"
+            >
+              <mat-option
+                *ngFor="let item of column.dropdownValues"
+                [value]="item.value"
+              >
                 {{ item.viewValue }}
               </mat-option>
             </mat-select>
           </mat-form-field>
           <span
-            *ngIf="column.columnType === ColumnType.Text"
+            *ngIf="column.columnType === columnType.Text"
             [ngClass]="{
               'padding-right': column.align === 'right' && column.sort
             }"
@@ -71,7 +87,7 @@
             {{ element[column.name] }}
           </span>
           <div
-            *ngIf="column.columnType === ColumnType.LinkAndDescription"
+            *ngIf="column.columnType === columnType.LinkAndDescription"
             [ngClass]="{
               'padding-right': column.align === 'right' && column.sort
             }"
@@ -86,7 +102,7 @@
             </div>
           </div>
           <div
-            *ngIf="column.columnType === ColumnType.CustomTemplate"
+            *ngIf="column.columnType === columnType.CustomTemplate"
             [ngClass]="{
               'padding-right': column.align === 'right' && column.sort
             }"
@@ -96,7 +112,9 @@
                 column.customTemplate || null;
                 context: {
                   rowData: element,
-                  clickEventHandler: this.emitClickedElementForCustomTemplate.bind(this)
+                  clickEventHandler: this.emitClickedElementForCustomTemplate.bind(
+                    this
+                  )
                 }
               "
             ></ng-container>
@@ -104,15 +122,23 @@
         </td>
       </ng-container>
 
-      <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: isStickyHeader()"></tr>
+      <tr
+        mat-header-row
+        *matHeaderRowDef="displayedColumns; sticky: isStickyHeader()"
+      ></tr>
       <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
     </table>
   </div>
-  <div *ngIf="!dataSource" class="loading-message">
-    <mat-spinner strokeWidth="3" [diameter]="30"></mat-spinner> &nbsp; Loading...
+  <div *ngIf="dataSource.loading$ | async" class="loading-message">
+    <mat-spinner strokeWidth="3" [diameter]="30"></mat-spinner> &nbsp;
+    Loading...
   </div>
-  <div *ngIf="dataSource?.length == 0" class="no-data-message">
+  <div *ngIf="dataSource.showNoDataMessage$ | async" class="no-data-message">
     {{ noDataMessage }}
   </div>
-  <mat-paginator [pageSizeOptions]="pageSizeOptions" *ngIf="requirePagination" showFirstLastButtons></mat-paginator>
+  <mat-paginator
+    [length]="dataCount"
+    [pageSizeOptions]="pageSizeOptions"
+    showFirstLastButtons
+  ></mat-paginator>
 </div>

@@ -1,6 +1,10 @@
 import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
-import { GridConfig, ColumnType, CustomTemplateEmitData } from './models/custom-data-grid';
+import { PageEvent } from '@angular/material/paginator';
+import { Sort } from '@angular/material/sort';
+import { CustomDataGridComponent } from './custom-data-grid/custom-data-grid.component';
+import { CustomDataSource } from './custom-data-grid/custom-datasource';
 import { EmployeeService } from './employee.service';
+import { ColumnType, CustomTemplateEmitData, GridConfig } from './models';
 import { IEmployee } from './models';
 
 @Component({
@@ -11,14 +15,19 @@ import { IEmployee } from './models';
 export class AppComponent implements OnInit {
   gridConfiguration!: GridConfig[];
   displayedColumns!: string[];
-  Employees!: IEmployee[];
+  employeesDataSource: CustomDataSource<IEmployee> = new CustomDataSource<IEmployee>();
   selectedEmployee!: IEmployee;
   GenderChangeData: any;
   clickedEmployee!: IEmployee;
   customTemplateColumn!: string;
+  gridSearchInputValue = '';
+  totalDataCount = 0;
+
+  @ViewChild('employeeGrid') employeeGrid!: CustomDataGridComponent;
 
   @ViewChild('homeTownTemplate', { static: true })
   homeTownTemplate!: TemplateRef<any>;
+
   @ViewChild('actionTemplate', { static: true })
   actionTemplate!: TemplateRef<any>;
 
@@ -26,7 +35,7 @@ export class AppComponent implements OnInit {
 
   ngOnInit(): void {
     this.setGridConfigs();
-    this.getEmps();
+    this.getEmps('', 'id', 'asc', 0, 5);
   }
 
   setGridConfigs(): void {
@@ -67,7 +76,7 @@ export class AppComponent implements OnInit {
         name: 'dob',
         label: 'DOB',
         columnType: ColumnType.Date,
-        sort: true,
+        sort: false,
         align: 'right',
         style: { width: '15%' }
       },
@@ -75,6 +84,7 @@ export class AppComponent implements OnInit {
         name: 'email',
         label: 'Email',
         columnType: ColumnType.Text,
+        sort: true,
         align: 'center',
         style: { width: '15%' }
       },
@@ -99,10 +109,15 @@ export class AppComponent implements OnInit {
     this.displayedColumns = ['name', 'gender', 'phone', 'dob', 'email', 'homeTown', 'action'];
   }
 
-  getEmps(): void {
-    this.employeeService.getEmployees().subscribe(
-      (data: IEmployee[]) => {
-        const empData: IEmployee[] = data.map(
+  getEmps(filter: string, sortColumn: string, sortDirection: string, pageIndex: number, pageSize: number): void {
+    this.employeesDataSource.setLoadingSubject(true);
+    this.employeesDataSource.setShowNoDataMessageSubject(false);
+    this.employeesDataSource.setDataSubject([]);
+    this.totalDataCount = 0;
+    this.employeeService.getEmployees(filter, sortColumn, sortDirection, pageIndex, pageSize).subscribe(
+      (res: any) => {
+        const { data, dataCount } = res;
+        const empData: IEmployee[] = (data as IEmployee[]).map(
           emp =>
             ({
               id: emp.id,
@@ -118,12 +133,13 @@ export class AppComponent implements OnInit {
               homeTown: { ...emp.homeTown, SearchSortField: 'name' }
             } as IEmployee)
         );
-        setTimeout(() => {
-          this.Employees = empData;
-        }, 2000);
+        this.employeesDataSource.setLoadingSubject(false);
+        this.employeesDataSource.setDataSubject(empData);
+        this.totalDataCount = dataCount;
       },
       err => {
-        this.Employees = []; // This stops the loader and shows no data message on the grid
+        this.employeesDataSource.setLoadingSubject(false);
+        this.employeesDataSource.setShowNoDataMessageSubject(true);
         console.error(err);
       }
     );
@@ -148,5 +164,30 @@ export class AppComponent implements OnInit {
         this.clickedEmployee = data.rowData as IEmployee;
         break;
     }
+  }
+
+  onSortOrPageChange(event: Sort | PageEvent): void {
+    if ('pageIndex' in event) {
+      this.getEmps(
+        this.gridSearchInputValue,
+        this.employeeGrid.sort.active,
+        this.employeeGrid.sort.direction,
+        event.pageIndex,
+        event.pageSize
+      );
+    } else {
+      this.getEmps(this.gridSearchInputValue, event.active, event.direction, 0, this.employeeGrid.paginator.pageSize);
+    }
+  }
+
+  onSearchInputChange(value: string): void {
+    this.gridSearchInputValue = value ? value : '';
+    this.getEmps(
+      this.gridSearchInputValue,
+      this.employeeGrid.sort.active,
+      this.employeeGrid.sort.direction,
+      0,
+      this.employeeGrid.paginator.pageSize
+    );
   }
 }

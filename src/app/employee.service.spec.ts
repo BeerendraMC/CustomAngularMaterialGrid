@@ -1,30 +1,25 @@
 import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
-import { HttpErrorResponse } from '@angular/common/http';
 
 import { EmployeeService } from './employee.service';
-import { IEmployee } from './models/employee';
+import { IEmployee } from './models';
+import { HttpErrorResponse } from '@angular/common/http';
 
 describe('EmployeeService', () => {
   let httpTestingController: HttpTestingController;
-  let employeeService: EmployeeService;
+  let service: EmployeeService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule],
       providers: [EmployeeService]
     });
-
-    httpTestingController = TestBed.get(HttpTestingController);
-    employeeService = TestBed.get(EmployeeService);
-  });
-
-  afterEach(() => {
-    httpTestingController.verify();
+    service = TestBed.inject(EmployeeService);
+    httpTestingController = TestBed.inject(HttpTestingController);
   });
 
   it('should be created', () => {
-    expect(employeeService).toBeTruthy();
+    expect(service).toBeTruthy();
   });
 
   it('should test getEmployees', () => {
@@ -47,19 +42,26 @@ describe('EmployeeService', () => {
       }
     ];
 
-    employeeService.getEmployees().subscribe(data => {
+    service.getEmployees('', '', '', 0, 5).subscribe(data => {
       expect(data).toEqual(testData, 'should check mock data');
     });
 
-    const req = httpTestingController.expectOne(`${employeeService.baseUrl}employees`);
+    const req = httpTestingController.expectOne(
+      `${service.baseUrl}employees?filter=&sortColumn=&sortOrder=&pageNumber=0&pageSize=5`
+    );
     expect(req.request.method).toEqual('GET');
+    expect(req.request.params.get('filter')).toEqual('');
+    expect(req.request.params.get('sortColumn')).toEqual('');
+    expect(req.request.params.get('sortOrder')).toEqual('');
+    expect(req.request.params.get('pageNumber')).toEqual('0');
+    expect(req.request.params.get('pageSize')).toEqual('5');
     req.flush(testData);
   });
 
   it('should test 404 error', () => {
     const errorMsg = 'mock 404 error occurred';
 
-    employeeService.getEmployees().subscribe(
+    service.getEmployees('', '', '', 0, 5).subscribe(
       data => fail('should have failed with the 404 error'),
       (error: HttpErrorResponse) => {
         expect(error.status).toEqual(404, 'status');
@@ -67,7 +69,9 @@ describe('EmployeeService', () => {
       }
     );
 
-    const req = httpTestingController.expectOne(`${employeeService.baseUrl}employees`);
+    const req = httpTestingController.expectOne(
+      `${service.baseUrl}employees?filter=&sortColumn=&sortOrder=&pageNumber=0&pageSize=5`
+    );
     req.flush(errorMsg, { status: 404, statusText: 'Not Found' });
   });
 });

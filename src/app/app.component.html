@@ -2,20 +2,21 @@
   <h2 style="margin-top: 0">Reusable Custom Angular Material Grid</h2>
   <div style="border: 1px solid rgba(0, 0, 0, 0.12)">
     <app-custom-data-grid
+      #employeeGrid
       [gridConfig]="gridConfiguration"
       [displayedColumns]="displayedColumns"
-      [dataSource]="Employees"
-      [defaultSortColumn]="{ name: 'dob', sortDirection: 'desc' }"
+      [dataSource]="employeesDataSource"
+      [dataCount]="totalDataCount"
       [verticalScrollOffsetInRows]="5"
       [searchOption]="{
-        onTwoColumns: ['name', 'dob'],
-        searchTextBoxLabel: 'Search by Name or DOB'
+        searchTextBoxLabel: 'Search by Name'
       }"
-      [requirePagination]="false"
       [freezeFirstAndLastColumns]="true"
       (linkClick)="onNameClick($event)"
       (selectionChange)="onGenderChange($event)"
       (customTemplateClick)="onCustomTemplateClick($event)"
+      (sortOrPageChange)="onSortOrPageChange($event)"
+      (searchInputChange)="onSearchInputChange($event)"
     ></app-custom-data-grid>
   </div>
 

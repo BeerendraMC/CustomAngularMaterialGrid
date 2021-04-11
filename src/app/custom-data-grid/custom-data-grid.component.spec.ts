@@ -1,26 +1,27 @@
-import { DatePipe } from '@angular/common';
 import { Component, CUSTOM_ELEMENTS_SCHEMA, OnInit, TemplateRef, ViewChild } from '@angular/core';
-import { ComponentFixture, inject, TestBed } from '@angular/core/testing';
-import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatTableModule } from '@angular/material/table';
-import { MatSortModule } from '@angular/material/sort';
-import { MatSelectModule } from '@angular/material/select';
-import { MatPaginatorModule } from '@angular/material/paginator';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { HarnessLoader, parallel } from '@angular/cdk/testing';
+import { TestbedHarnessEnvironment } from '@angular/cdk/testing/testbed';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ColumnType, CustomTemplateEmitData, GridConfig } from '../models';
+
+import { CustomDataGridComponent } from './custom-data-grid.component';
+import { MatTableModule } from '@angular/material/table';
+import { MatSortModule, Sort } from '@angular/material/sort';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatSelectModule } from '@angular/material/select';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
+import { MatButtonModule } from '@angular/material/button';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { DatePipe } from '@angular/common';
 import { MatTableHarness } from '@angular/material/table/testing';
-import { MatSelectHarness } from '@angular/material/select/testing';
 import { MatButtonHarness } from '@angular/material/button/testing';
-import { MatPaginatorHarness } from '@angular/material/paginator/testing';
+import { CustomDataSource } from './custom-datasource';
+import { MatInputModule } from '@angular/material/input';
 import { MatInputHarness } from '@angular/material/input/testing';
 import { MatFormFieldHarness } from '@angular/material/form-field/testing';
+import { MatSelectHarness } from '@angular/material/select/testing';
 import { MatSortHarness } from '@angular/material/sort/testing';
-import { TestbedHarnessEnvironment } from '@angular/cdk/testing/testbed';
-import { MatButtonModule } from '@angular/material/button';
-import { MatInputModule } from '@angular/material/input';
-
-import { ColumnType, CustomTemplateEmitData, GridConfig } from '../models';
-import { CustomDataGridComponent } from './custom-data-grid.component';
+import { MatPaginatorHarness } from '@angular/material/paginator/testing';
 
 @Component({
   template: `
@@ -40,7 +41,7 @@ class TestWrapperComponent implements OnInit {
   @ViewChild('actionsTemplate', { static: true })
   actionsTemplate!: TemplateRef<any>;
   gridConfig!: GridConfig[];
-  mockData: any[] = [{ id: 1 }];
+  mockData = new CustomDataSource<any>();
   columns: string[] = ['actions'];
   emittedData!: CustomTemplateEmitData;
 
@@ -53,6 +54,7 @@ class TestWrapperComponent implements OnInit {
         customTemplate: this.actionsTemplate
       }
     ];
+    this.mockData.setDataSubject([{ id: 1 }]);
   }
 
   onCustomTemplateClick(data: CustomTemplateEmitData): void {
@@ -140,12 +142,13 @@ describe('CustomDataGridComponent', () => {
       providers: [{ provide: DatePipe }],
       schemas: [CUSTOM_ELEMENTS_SCHEMA]
     }).compileComponents();
+  });
+
+  beforeEach(() => {
     fixture = TestBed.createComponent(CustomDataGridComponent);
-    loader = TestbedHarnessEnvironment.loader(fixture);
     component = fixture.componentInstance;
-    component.gridConfig = mockGridConfiguration;
-    component.displayedColumns = mockDisplayedColumns;
-    component.dataSource = mockGridData;
+    loader = TestbedHarnessEnvironment.loader(fixture);
+    component.dataSource = new CustomDataSource<any>();
     fixture.detectChanges();
   });
 
@@ -153,23 +156,9 @@ describe('CustomDataGridComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should test defaultSortColumn, verticalScrollOffsetInRows and requirePagination input properties', async () => {
-    component.defaultSortColumn = { name: 'name', sortDirection: 'desc' };
+  it('should test verticalScrollOffsetInRows input property', async () => {
     component.verticalScrollOffsetInRows = 1;
-    component.requirePagination = false;
     component.ngOnInit();
-    component.ngOnChanges();
-    await fixture.whenStable();
-    const table = await loader.getHarness(MatTableHarness);
-    const rows = await table.getRows();
-    loader.getHarness(MatPaginatorHarness).catch(err => {
-      expect(err).toBeDefined();
-    });
-    const firstRowCells = await rows[0].getCells();
-    const firstRowCellTexts = await parallel(() => firstRowCells.map(cell => cell.getText()));
-    expect(firstRowCellTexts).toEqual([mockGridData[1].id.toString(), mockGridData[1].name, 'Male']);
-    expect(component.sort.active).toEqual('name');
-    expect(component.sort.direction).toEqual('desc');
     expect(component.tableScrollStyle).toEqual({
       'max-height': `${56 * 2}px`,
       'overflow-y': 'auto'
@@ -178,8 +167,7 @@ describe('CustomDataGridComponent', () => {
 
   it('should test noDataMessage input properties', async () => {
     component.noDataMessage = 'No data available';
-    component.dataSource = [];
-    component.ngOnChanges();
+    component.dataSource.setShowNoDataMessageSubject(true);
     fixture.detectChanges();
     await fixture.whenStable();
     const msgDiv = document.querySelector('.no-data-message') as HTMLElement;
@@ -191,405 +179,17 @@ describe('CustomDataGridComponent', () => {
       expect(err).toBeDefined();
     });
     component.searchOption = {
-      onColumn: 'name',
       searchTextBoxLabel: 'Search by name'
     };
-    component.ngOnChanges();
     const formField = await loader.getHarness(MatFormFieldHarness.with({ selector: '.search-field' }));
     const searchInput = await formField.getControl(MatInputHarness);
     expect(await formField.getLabel()).toEqual('Search by name');
-    await searchInput?.setValue('manju');
-    const table = await loader.getHarness(MatTableHarness);
-    let rows = await table.getRows();
-    expect(rows.length).toBe(1);
-    const cells = await rows[0].getCells();
-    const cellTexts = await parallel(() => cells.map(cell => cell.getText()));
-    expect(cellTexts).toEqual([mockGridData[1].id.toString(), mockGridData[1].name, 'Male']);
-    await searchInput?.setValue('xyz');
-    rows = await table.getRows();
-    expect(rows.length).toBe(0);
-  });
-
-  it('should test search functionality on LinkAndDescription columnType', async () => {
-    component.gridConfig = mockGridConfiguration.map((x, i) => {
-      return i === 1 ? { ...x, columnType: ColumnType.LinkAndDescription } : { ...x };
-    });
-    component.dataSource = mockGridData.map(x => ({
-      ...x,
-      name: {
-        Link: x.name,
-        Description: 'dummy description',
-        SearchSortField: 'Link'
-      }
-    }));
-    component.searchOption = {
-      onColumn: 'name',
-      searchTextBoxLabel: 'Search by name'
-    };
-    component.ngOnChanges();
-    const formField = await loader.getHarness(MatFormFieldHarness.with({ selector: '.search-field' }));
-    const searchInput = await formField.getControl(MatInputHarness);
-    expect(await formField.getLabel()).toEqual('Search by name');
-    await searchInput?.setValue('beerendra');
-    const table = await loader.getHarness(MatTableHarness);
-    const rows = await table.getRows();
-    expect(rows.length).toBe(1);
-    const cells = await rows[0].getCells();
-    const cellTexts = await parallel(() => cells.map(cell => cell.getText()));
-    expect(cellTexts[0]).toEqual(mockGridData[0].id.toString());
-  });
-
-  it('should test search functionality on Date columnType', inject([DatePipe], async (datePipe: DatePipe) => {
-    component.gridConfig = [
-      ...mockGridConfiguration,
-      {
-        name: 'dob',
-        label: 'DOB',
-        columnType: ColumnType.Date
-      }
-    ];
-    component.displayedColumns = [...mockDisplayedColumns, 'dob'];
-    component.dataSource = mockGridData.map((x, i) => ({
-      ...x,
-      dob: i === 0 ? new Date('1997/11/06') : new Date('1996/03/08')
-    }));
-    component.searchOption = {
-      onColumn: 'dob',
-      searchTextBoxLabel: 'Search by dob'
-    };
-    component.ngOnChanges();
-    const formField = await loader.getHarness(MatFormFieldHarness.with({ selector: '.search-field' }));
-    const searchInput = await formField.getControl(MatInputHarness);
-    expect(await formField.getLabel()).toEqual('Search by dob');
-    await searchInput?.setValue('1997');
-    const table = await loader.getHarness(MatTableHarness);
-    const rows = await table.getRows();
-    expect(rows.length).toBe(1);
-    const cells = await rows[0].getCells();
-    const cellTexts = await parallel(() => cells.map(cell => cell.getText()));
-    const transformedDate = datePipe.transform(new Date('1997/11/06')) as string;
-    expect(cellTexts).toEqual([mockGridData[0].id.toString(), mockGridData[0].name, 'Male', transformedDate]);
-  }));
-
-  it('should test search functionality on two columns (both of type Text)', async () => {
-    component.searchOption = {
-      onTwoColumns: ['name', 'gender'],
-      searchTextBoxLabel: 'Search by name or gender'
-    };
-    component.dataSource = mockGridData.map((x, i) => ({
-      ...x,
-      gender: i === 0 ? 'male' : 'female'
-    }));
-    component.ngOnChanges();
-    const formField = await loader.getHarness(MatFormFieldHarness.with({ selector: '.search-field' }));
-    const searchInput = await formField.getControl(MatInputHarness);
-    expect(await formField.getLabel()).toEqual('Search by name or gender');
-
-    // search by name
-    await searchInput?.setValue('beerendra');
-    const table = await loader.getHarness(MatTableHarness);
-    let rows = await table.getRows();
-    expect(rows.length).toBe(1);
-    let cells = await rows[0].getCells();
-    let cellTexts = await parallel(() => cells.map(cell => cell.getText()));
-    expect(cellTexts).toEqual([mockGridData[0].id.toString(), mockGridData[0].name, 'Male']);
-
-    // search by gender
-    await searchInput?.setValue('female');
-    rows = await table.getRows();
-    expect(rows.length).toBe(1);
-    cells = await rows[0].getCells();
-    cellTexts = await parallel(() => cells.map(cell => cell.getText()));
-    expect(cellTexts).toEqual([mockGridData[1].id.toString(), mockGridData[1].name, 'Female']);
-  });
-
-  it('should test search functionality on two columns (both of type Date)', inject(
-    [DatePipe],
-    async (datePipe: DatePipe) => {
-      component.gridConfig = [
-        { name: 'dob', label: 'DOB', columnType: ColumnType.Date },
-        { name: 'doj', label: 'DOJ', columnType: ColumnType.Date }
-      ];
-      component.dataSource = [
-        { dob: new Date('1997/11/06'), doj: new Date('2018/06/13') },
-        { dob: new Date('1996/03/08'), doj: new Date('2019/11/10') }
-      ];
-      component.displayedColumns = ['dob', 'doj'];
-      component.searchOption = {
-        onTwoColumns: ['dob', 'doj'],
-        searchTextBoxLabel: 'Search by dob or doj'
-      };
-      component.ngOnChanges();
-      const formField = await loader.getHarness(MatFormFieldHarness.with({ selector: '.search-field' }));
-      const searchInput = await formField.getControl(MatInputHarness);
-      expect(await formField.getLabel()).toEqual('Search by dob or doj');
-
-      // search by dob
-      await searchInput?.setValue('1997');
-      const table = await loader.getHarness(MatTableHarness);
-      let rows = await table.getRows();
-      expect(rows.length).toBe(1);
-      let cells = await rows[0].getCells();
-      let cellTexts = await parallel(() => cells.map(cell => cell.getText()));
-      let transformedDob = datePipe.transform(new Date('1997/11/06')) as string;
-      let transformedDoj = datePipe.transform(new Date('2018/06/13')) as string;
-      expect(cellTexts).toEqual([transformedDob, transformedDoj]);
-
-      // search by doj
-      await searchInput?.setValue('2019');
-      rows = await table.getRows();
-      expect(rows.length).toBe(1);
-      cells = await rows[0].getCells();
-      cellTexts = await parallel(() => cells.map(cell => cell.getText()));
-      transformedDob = datePipe.transform(new Date('1996/03/08')) as string;
-      transformedDoj = datePipe.transform(new Date('2019/11/10')) as string;
-      expect(cellTexts).toEqual([transformedDob, transformedDoj]);
-    }
-  ));
-
-  it('should test search functionality on two columns (both of type LinkAndDescription)', async () => {
-    component.gridConfig = [
-      {
-        name: 'name',
-        label: 'Name',
-        columnType: ColumnType.LinkAndDescription
-      },
-      {
-        name: 'designation',
-        label: 'Designation',
-        columnType: ColumnType.LinkAndDescription
-      }
-    ];
-    component.dataSource = [
-      {
-        name: {
-          Link: 'Beerendra',
-          Description: 'xxxx',
-          SearchSortField: 'Link'
-        },
-        designation: {
-          Link: 'SE',
-          Description: 'xxxx',
-          SearchSortField: 'Link'
-        }
-      },
-      {
-        name: { Link: 'Manju', Description: 'xxxx', SearchSortField: 'Link' },
-        designation: {
-          Link: 'JSE',
-          Description: 'xxxx',
-          SearchSortField: 'Link'
-        }
-      }
-    ];
-    component.displayedColumns = ['name', 'designation'];
-    component.searchOption = {
-      onTwoColumns: ['name', 'designation'],
-      searchTextBoxLabel: 'Search by name or designation'
-    };
-    component.ngOnChanges();
-    const formField = await loader.getHarness(MatFormFieldHarness.with({ selector: '.search-field' }));
-    const searchInput = await formField.getControl(MatInputHarness);
-    expect(await formField.getLabel()).toEqual('Search by name or designation');
-
-    // search by name
-    await searchInput?.setValue('beerendra');
-    const table = await loader.getHarness(MatTableHarness);
-    let rows = await table.getRows();
-    expect(rows.length).toBe(1);
-    let cells = await rows[0].getCells();
-    expect(await cells[0].getText()).toContain('Beerendra');
-
-    // search by designation
-    await searchInput?.setValue('JSE');
-    rows = await table.getRows();
-    expect(rows.length).toBe(1);
-    cells = await rows[0].getCells();
-    expect(await cells[0].getText()).toContain('Manju');
-  });
-
-  it('should test global search functionality', async () => {
-    component.searchOption = {
-      onColumn: 'globalFilter',
-      searchTextBoxLabel: 'Global search'
-    };
-    component.ngOnChanges();
-    const formField = await loader.getHarness(MatFormFieldHarness.with({ selector: '.search-field' }));
-    const searchInput = await formField.getControl(MatInputHarness);
-    expect(await formField.getLabel()).toEqual('Global search');
-
-    // search by name
-    await searchInput?.setValue('beerendra');
-    const table = await loader.getHarness(MatTableHarness);
-    let rows = await table.getRows();
-    expect(rows.length).toBe(1);
-    let cells = await rows[0].getCells();
-    let cellTexts = await parallel(() => cells.map(cell => cell.getText()));
-    expect(cellTexts).toEqual([mockGridData[0].id.toString(), mockGridData[0].name, 'Male']);
-
-    // search by id
-    await searchInput?.setValue('2');
-    rows = await table.getRows();
-    expect(rows.length).toBe(1);
-    cells = await rows[0].getCells();
-    cellTexts = await parallel(() => cells.map(cell => cell.getText()));
-    expect(cellTexts).toEqual([mockGridData[1].id.toString(), mockGridData[1].name, 'Male']);
-  });
-
-  it('should test global search functionality when grid contains null data', async () => {
-    component.gridConfig = [
-      ...mockGridConfiguration.map((x, i) => {
-        return i === 1 ? { ...x, columnType: ColumnType.LinkAndDescription } : { ...x };
-      }),
-      {
-        name: 'dob',
-        label: 'DOB',
-        columnType: ColumnType.Date
-      }
-    ];
-    component.displayedColumns = [...mockDisplayedColumns, 'dob'];
-    component.dataSource = [
-      ...mockGridData.map((x, i) => ({
-        ...x,
-        name: {
-          Link: x.name,
-          Description: 'dummy description',
-          SearchSortField: 'Link'
-        },
-        dob: i === 0 ? new Date('1997/11/06') : new Date('1996/03/08')
-      })),
-      {
-        id: null,
-        name: { Link: null, Description: null, SearchSortField: 'Link' },
-        gender: null,
-        dob: null
-      }
-    ];
-    component.searchOption = {
-      onColumn: 'globalFilter',
-      searchTextBoxLabel: 'Global search'
-    };
-    component.ngOnChanges();
-    const formField = await loader.getHarness(MatFormFieldHarness.with({ selector: '.search-field' }));
-    const searchInput = await formField.getControl(MatInputHarness);
-    expect(await formField.getLabel()).toEqual('Global search');
-
-    // search by name
-    await searchInput?.setValue('beerendra');
-    const table = await loader.getHarness(MatTableHarness);
-    let rows = await table.getRows();
-    expect(rows.length).toBe(1);
-    let cells = await rows[0].getCells();
-    expect(await cells[0].getText()).toEqual(mockGridData[0].id.toString());
-
-    // search by dob
-    await searchInput?.setValue('1997');
-    rows = await table.getRows();
-    expect(rows.length).toBe(1);
-    cells = await rows[0].getCells();
-    expect(await cells[0].getText()).toEqual(mockGridData[0].id.toString());
-
-    // search by id
-    await searchInput?.setValue('2');
-    rows = await table.getRows();
-    expect(rows.length).toBe(1);
-    cells = await rows[0].getCells();
-    expect(await cells[0].getText()).toEqual(mockGridData[1].id.toString());
-  });
-
-  it('should test search functionality on two columns when they have null values', async () => {
-    component.dataSource = [...mockGridData, { id: null, name: null, gender: null }];
-    component.searchOption = {
-      onTwoColumns: ['id', 'name'],
-      searchTextBoxLabel: 'Search by id or name'
-    };
-    component.ngOnChanges();
-    const formField = await loader.getHarness(MatFormFieldHarness.with({ selector: '.search-field' }));
-    const searchInput = await formField.getControl(MatInputHarness);
-    expect(await formField.getLabel()).toEqual('Search by id or name');
-
-    // search by id
-    await searchInput?.setValue('2');
-    const table = await loader.getHarness(MatTableHarness);
-    let rows = await table.getRows();
-    expect(rows.length).toBe(1);
-    let cells = await rows[0].getCells();
-    expect(await cells[0].getText()).toEqual('2');
-
-    // search by name
-    await searchInput?.setValue('beerendra');
-    rows = await table.getRows();
-    expect(rows.length).toBe(1);
-    cells = await rows[0].getCells();
-    expect(await cells[1].getText()).toContain('Beerendra');
-  });
-
-  it('should test sort functionality on Date columnType', inject([DatePipe], async (datePipe: DatePipe) => {
-    component.gridConfig = [
-      ...mockGridConfiguration,
-      {
-        name: 'dob',
-        label: 'DOB',
-        columnType: ColumnType.Date,
-        sort: true
-      }
-    ];
-    component.displayedColumns = [...mockDisplayedColumns, 'dob'];
-    component.dataSource = mockGridData.map((x, i) => ({
-      ...x,
-      dob: i === 0 ? new Date('1997/11/06') : new Date('1996/03/08')
-    }));
-    component.ngOnChanges();
-    const sort = await loader.getHarness(MatSortHarness);
-    const sortHeader = (await sort.getSortHeaders())[3];
-    await sortHeader.click();
-    const table = await loader.getHarness(MatTableHarness);
-    const rows = await table.getRows();
-    const firstRowCells = await rows[0].getCells();
-    const firstRowCellTexts = await parallel(() => firstRowCells.map(cell => cell.getText()));
-    const transformedDate = datePipe.transform(new Date('1996/03/08')) as string;
-    expect(firstRowCellTexts).toEqual([mockGridData[1].id.toString(), mockGridData[1].name, 'Male', transformedDate]);
-  }));
-
-  it('should test sort functionality on LinkAndDescription columnType', async () => {
-    component.gridConfig = mockGridConfiguration.map((x, i) => {
-      return i === 1 ? { ...x, columnType: ColumnType.LinkAndDescription, sort: true } : { ...x };
-    });
-    component.dataSource = mockGridData.map(x => ({
-      ...x,
-      name: {
-        Link: x.name,
-        Description: 'dummy description',
-        SearchSortField: 'Link'
-      }
-    }));
-    component.ngOnChanges();
-    const sort = await loader.getHarness(MatSortHarness);
-    const sortHeader = (await sort.getSortHeaders())[1];
-    await sortHeader.click();
-    await sortHeader.click();
-    const table = await loader.getHarness(MatTableHarness);
-    const rows = await table.getRows();
-    const firstRowCells = await rows[0].getCells();
-    const firstRowCellTexts = await parallel(() => firstRowCells.map(cell => cell.getText()));
-    expect(firstRowCellTexts[0]).toEqual(mockGridData[1].id.toString());
-  });
-
-  it('should test sort functionality on column having null value', async () => {
-    component.dataSource = [...mockGridData, { id: null, name: null, gender: null }];
-    component.ngOnChanges();
-    const sort = await loader.getHarness(MatSortHarness);
-    const sortHeader = (await sort.getSortHeaders())[1];
-    await sortHeader.click();
-    const table = await loader.getHarness(MatTableHarness);
-    const rows = await table.getRows();
-    const firstRowCells = await rows[0].getCells();
-    const firstRowCellTexts = await parallel(() => firstRowCells.map(cell => cell.getText()));
-    expect(firstRowCellTexts[0]).toBeFalsy();
   });
 
   it('should test the table', async () => {
-    component.ngOnChanges();
+    component.gridConfig = mockGridConfiguration;
+    component.displayedColumns = mockDisplayedColumns;
+    component.dataSource.setDataSubject(mockGridData);
     const table = await loader.getHarness(MatTableHarness);
     const headerRows = await table.getHeaderRows();
     const rows = await table.getRows();
@@ -613,23 +213,29 @@ describe('CustomDataGridComponent', () => {
     expect(secondRowCellTexts).toEqual([mockGridData[1].id.toString(), mockGridData[1].name, 'Male']);
   });
 
-  it('should test linkClick output event', async () => {
-    component.ngOnChanges();
+  it('should test linkClick output event', async done => {
+    component.gridConfig = mockGridConfiguration;
+    component.displayedColumns = mockDisplayedColumns;
+    component.dataSource.setDataSubject(mockGridData);
     fixture.detectChanges();
     await fixture.whenStable();
     component.linkClick.subscribe((rowData: any) => {
       expect(rowData).toBe(mockGridData[0]);
+      done();
     });
     const firstLink = fixture.nativeElement.querySelectorAll('tr a')[0];
     firstLink.click();
     fixture.detectChanges();
   });
 
-  it('should test selectionChange output event', async () => {
-    component.ngOnChanges();
+  it('should test selectionChange output event', async done => {
+    component.gridConfig = mockGridConfiguration;
+    component.displayedColumns = mockDisplayedColumns;
+    component.dataSource.setDataSubject(mockGridData);
     component.selectionChange.subscribe((data: any) => {
       expect(data?.element).toBe(mockGridData[0]);
       expect(data?.selectedValue).toBe('female');
+      done();
     });
     const table = await loader.getHarness(MatTableHarness);
     const select = await table.getHarness(MatSelectHarness);
@@ -637,15 +243,57 @@ describe('CustomDataGridComponent', () => {
     await select.clickOptions({ text: 'Female' });
   });
 
+  it('should test sortOrPageChange (sort)', async done => {
+    component.gridConfig = mockGridConfiguration;
+    component.displayedColumns = mockDisplayedColumns;
+    component.dataSource.setDataSubject(mockGridData);
+    component.sortOrPageChange.subscribe((data: Sort) => {
+      expect(data.active).toEqual('name');
+      expect(data.direction).toEqual('asc');
+      done();
+    });
+    const sort = await loader.getHarness(MatSortHarness);
+    const sortHeader = (await sort.getSortHeaders())[1];
+    await sortHeader.click();
+  });
+
+  it('should test sortOrPageChange (paginator)', async done => {
+    component.gridConfig = mockGridConfiguration;
+    component.displayedColumns = mockDisplayedColumns;
+    component.dataSource.setDataSubject(mockGridData);
+    component.sortOrPageChange.subscribe((data: PageEvent) => {
+      expect(data.pageIndex).toEqual(0);
+      expect(data.pageSize).toEqual(10);
+      done();
+    });
+    const paginator = await loader.getHarness(MatPaginatorHarness);
+    await paginator.setPageSize(10);
+  });
+
+  it('should test searchInputChange', async done => {
+    component.gridConfig = mockGridConfiguration;
+    component.displayedColumns = mockDisplayedColumns;
+    component.dataSource.setDataSubject(mockGridData);
+    component.searchOption = {
+      searchTextBoxLabel: 'Search by name'
+    };
+    component.searchInputChange.subscribe((data: string) => {
+      expect(data).toEqual('manju');
+      done();
+    });
+    const formField = await loader.getHarness(MatFormFieldHarness.with({ selector: '.search-field' }));
+    const searchInput = await formField.getControl(MatInputHarness);
+    expect(await formField.getLabel()).toEqual('Search by name');
+    component.ngAfterViewInit();
+    await searchInput?.setValue('manju');
+  });
+
   it('should test isStickyHeader method', () => {
+    component.gridConfig = mockGridConfiguration;
+    component.displayedColumns = mockDisplayedColumns;
+    component.dataSource.setDataSubject(mockGridData);
     expect(component.isStickyHeader()).toBeFalse();
     component.verticalScrollOffsetInRows = 1;
-    component.requirePagination = false;
-    component.ngOnChanges();
-    expect(component.isStickyHeader()).toBeTrue();
-
-    component.requirePagination = true;
-    component.ngOnChanges();
     expect(component.isStickyHeader()).toBeTrue();
   });
 
