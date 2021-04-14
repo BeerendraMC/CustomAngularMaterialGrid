@@ -1,6 +1,6 @@
-# CustomMaterialGrid
+# CustomMaterialGrid for Server Side Interactions
 
-CustomDataGrid is a configurable and re-usable component built on angular using [Angular Material data table](https://material.angular.io/components/table/overview).
+CustomDataGrid is a configurable and re-usable component built on angular using [Angular Material data table](https://material.angular.io/components/table/overview) which supports server side interactions (pagination, sorting, filtering).
 
 ## How to run
 
@@ -11,11 +11,11 @@ Navigate to `http://localhost:4200/`. The app will automatically reload if you c
 
 ## Documentation
 
-This component dynamically renders the grid using `GridConfig` as Input array of objects where each object represents the configuration of a column. And three events are exposed as output objects, respective actions can be taken on parent components.
+This component dynamically renders the grid using `GridConfig` as Input array of objects where each object represents the configuration of a given column. And four events are exposed as output objects, respective actions can be taken on parent component.
 
-This has capability to integrate with any API response format and each actions can be controlled from parent components.
+This has capability to integrate with any API response format and each actions can be controlled from parent component.
 
-This component also supports `custom CSS` (column level), `hyperlink`, `hyperlink and description`, `dropdown` and `custom templates`. On click of hyperlink it emits an event (`linkClick`) with the respective row data object. And on selection change of dropdown it emits an event (`selectionChange`) with the respective row data object and the selected value. On click of custom template it emits an event (`customTemplateClick`) with the column name that is being passed in the template and row data.
+This component also supports `custom CSS` (column level), `hyperlink`, `hyperlink and description`, `dropdown` and `custom templates`. On click of hyperlink it emits an event (`linkClick`) with the respective row data object. And on selection change of dropdown it emits an event (`selectionChange`) with the respective row data object and the selected value. On sort (active sort or sort direction) change and/or page (size or index) change it emits an event (`sortOrPageChange`) with the respective event data (`Sort` or `PageEvent`).
 
 Here are the GridConfig, DropdownValue interfaces and ColumnType enum:
 
@@ -44,17 +44,12 @@ export interface DropdownValue {
   value: string | number;
   viewValue: string | number;
 }
-
-export interface CustomTemplateEmitData {
-  column: string;
-  rowData: any;
-}
 ```
 
 ### `GridConfig` properties:
 
 - `name`: represents the name of the property to bind to. This should match the property name of your model
-- `label`: represents the column label to display on the grid
+- `label`: represents the column header label to display on the grid
 - `columnType`: it’s of type ColumnType enum. It represents what kind of values that the column is going to have. The Date column will display date objects in ‘MMM dd, yyyy’ format
 - `style`: style object. Styles provided here will apply to the respective column
 - `sort`: represents whether the sort option is required on the column or not (defaults to false)
@@ -120,17 +115,15 @@ gridConfiguration: GridConfig[] = [
 ]
 ```
 
-### List of Features supported by Grid component
+### List of Features supported
 
-- Sort on individual column and default sort option
-- Search (Globally or on a particular column or on any two columns. For global filter you must pass ‘globalFilter’ string to the ‘onColumn’ property of ‘searchOption’ input object)
-- Optional pagination
-- Configurable page size options
+- Server side pagination, sorting and filtering.
+- Configurable page size options.
 - Vertical scroll bar if the user selects more than the given no of rows per page (that number is configurable). When the user selects 20 rows per page from the page size options the height of the grid increases but our customer wanted to freeze the height to display a certain no of rows (10 or 5) and introduce a vertical scroll if the user wants to view more rows than that number.
 - Hyperlink
 - Hyperlink and description
 - Dropdown
-- Multiple Custom Template columns with click events
-- Custom CSS (column level)
-- Spinner (while fetching data from the api)
+- Multiple Custom Template columns.
+- Custom CSS (column level).
+- Spinner (while fetching data from the api).
 - Configurable message to display when there is no data (defaults to ‘No data available.’)

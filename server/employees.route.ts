@@ -42,8 +42,6 @@ export const getEmployees = (req: Request, res: Response) => {
   const initialPos: number = Number(pageNumber) * Number(pageSize);
 
   const employeesPage = employees.slice(initialPos, initialPos + Number(pageSize));
-  console.log('initialPos, pageSize', initialPos, pageSize);
-  console.log('initialPos + ((pageSize as unknown) as number)', initialPos + Number(pageSize));
 
   setTimeout(() => {
     res.status(200).json({ data: employeesPage, dataCount });

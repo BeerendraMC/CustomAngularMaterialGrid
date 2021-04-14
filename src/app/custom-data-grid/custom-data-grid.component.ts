@@ -55,7 +55,7 @@ export class CustomDataGridComponent implements OnInit, AfterViewInit {
    * The message to be displayed when there is no data.
    * Defaults to 'N/A'.
    */
-  @Input() noDataMessage = 'N/A';
+  @Input() noDataMessage = 'No data available.';
 
   /**
    * Freeze first and last columns for mobile devices (max-width: 1023px).
