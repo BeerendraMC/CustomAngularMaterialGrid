@@ -15,7 +15,14 @@ This component dynamically renders the grid using `GridConfig` as Input array of
 
 This has capability to integrate with any API response format and each actions can be controlled from parent component.
 
-This component also supports `custom CSS` (column level), `hyperlink`, `hyperlink and description`, `dropdown` and `custom templates`. On click of hyperlink it emits an event (`linkClick`) with the respective row data object. And on selection change of dropdown it emits an event (`selectionChange`) with the respective row data object and the selected value. On sort (active sort or sort direction) change and/or page (size or index) change it emits an event (`sortOrPageChange`) with the respective event data (`Sort` or `PageEvent`).
+This component also supports `custom CSS` (column level), `hyperlink`, `hyperlink and description`, `dropdown` and `custom templates`.
+
+### `Output` events:
+
+- `linkClick`: event emitted on click of hyperlink with the respective row data object.
+- `selectionChange`: event emitted on selection change of dropdown with the respective row data object and the selected value.
+- `sortOrPageChange`: event emitted on sort (active sort or sort direction) change and/or page (size or index) change with the respective event data (`Sort` or `PageEvent`).
+- `searchInputChange`: event emitted with the search term when the user enters search term in the search input.
 
 Here are the GridConfig, DropdownValue interfaces and ColumnType enum:
 
