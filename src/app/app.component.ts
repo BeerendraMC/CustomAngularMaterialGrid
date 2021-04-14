@@ -4,7 +4,7 @@ import { Sort } from '@angular/material/sort';
 import { CustomDataGridComponent } from './custom-data-grid/custom-data-grid.component';
 import { CustomDataSource } from './custom-data-grid/custom-datasource';
 import { EmployeeService } from './employee.service';
-import { ColumnType, CustomTemplateEmitData, GridConfig } from './models';
+import { ColumnType, GridConfig } from './models';
 import { IEmployee } from './models';
 
 @Component({
@@ -17,7 +17,7 @@ export class AppComponent implements OnInit {
   displayedColumns!: string[];
   employeesDataSource: CustomDataSource<IEmployee> = new CustomDataSource<IEmployee>();
   selectedEmployee!: IEmployee;
-  GenderChangeData: any;
+  genderChangeData: any;
   clickedEmployee!: IEmployee;
   customTemplateColumn!: string;
   gridSearchInputValue = '';
@@ -150,20 +150,17 @@ export class AppComponent implements OnInit {
   }
 
   onGenderChange(data: any): void {
-    this.GenderChangeData = data;
+    this.genderChangeData = data;
   }
 
-  onCustomTemplateClick(data: CustomTemplateEmitData): void {
-    switch (data.column) {
-      case 'homeTown':
-        this.customTemplateColumn = 'homeTown';
-        this.clickedEmployee = data.rowData as IEmployee;
-        break;
-      case 'action':
-        this.customTemplateColumn = 'action';
-        this.clickedEmployee = data.rowData as IEmployee;
-        break;
-    }
+  onHomeTownClick(data: IEmployee): void {
+    this.customTemplateColumn = 'homeTown';
+    this.clickedEmployee = data;
+  }
+
+  onActionClick(data: IEmployee): void {
+    this.customTemplateColumn = 'action';
+    this.clickedEmployee = data;
   }
 
   onSortOrPageChange(event: Sort | PageEvent): void {

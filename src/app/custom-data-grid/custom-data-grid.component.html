@@ -1,9 +1,5 @@
 <div class="mat-elevation-z8">
-  <mat-form-field
-    class="search-field"
-    *ngIf="searchOption"
-    [ngStyle]="searchOption?.searchBoxStyle || null"
-  >
+  <mat-form-field class="search-field" *ngIf="searchOption" [ngStyle]="searchOption?.searchBoxStyle!">
     <mat-label>{{ searchOption?.searchTextBoxLabel }}</mat-label>
     <input matInput #input autocomplete="off" />
     <mat-icon matPrefix>search</mat-icon>
@@ -11,21 +7,15 @@
   <div
     [ngStyle]="isStickyHeader() ? tableScrollStyle : null"
     [ngClass]="{
-      'sticky-first-last-columns':
-        !(dataSource.loading$ | async) && freezeFirstAndLastColumns
+      'sticky-first-last-columns': !(dataSource.loading$ | async) && freezeFirstAndLastColumns
     }"
   >
     <table mat-table [dataSource]="dataSource" matSort>
       <ng-container
         *ngFor="let column of gridConfig"
         [matColumnDef]="column.name"
-        [sticky]="
-          freezeFirstAndLastColumns && column.name === displayedColumns[0]
-        "
-        [stickyEnd]="
-          freezeFirstAndLastColumns &&
-          column.name === displayedColumns[(displayedColumns?.length || 0) - 1]
-        "
+        [sticky]="freezeFirstAndLastColumns && column.name === displayedColumns[0]"
+        [stickyEnd]="freezeFirstAndLastColumns && column.name === displayedColumns[(displayedColumns?.length || 0) - 1]"
       >
         <th
           mat-header-cell
@@ -66,14 +56,8 @@
             [ngStyle]="column.style || null"
             *ngIf="column.columnType === columnType.Dropdown"
           >
-            <mat-select
-              [value]="element[column.name]"
-              (selectionChange)="emitSelectedElement(element, $event)"
-            >
-              <mat-option
-                *ngFor="let item of column.dropdownValues"
-                [value]="item.value"
-              >
+            <mat-select [value]="element[column.name]" (selectionChange)="emitSelectedElement(element, $event)">
+              <mat-option *ngFor="let item of column.dropdownValues" [value]="item.value">
                 {{ item.viewValue }}
               </mat-option>
             </mat-select>
@@ -108,37 +92,21 @@
             }"
           >
             <ng-container
-              *ngTemplateOutlet="
-                column.customTemplate || null;
-                context: {
-                  rowData: element,
-                  clickEventHandler: this.emitClickedElementForCustomTemplate.bind(
-                    this
-                  )
-                }
-              "
+              *ngTemplateOutlet="column.customTemplate || null; context: { $implicit: element }"
             ></ng-container>
           </div>
         </td>
       </ng-container>
 
-      <tr
-        mat-header-row
-        *matHeaderRowDef="displayedColumns; sticky: isStickyHeader()"
-      ></tr>
+      <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: isStickyHeader()"></tr>
       <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
     </table>
   </div>
   <div *ngIf="dataSource.loading$ | async" class="loading-message">
-    <mat-spinner strokeWidth="3" [diameter]="30"></mat-spinner> &nbsp;
-    Loading...
+    <mat-spinner strokeWidth="3" [diameter]="30"></mat-spinner> &nbsp; Loading...
   </div>
   <div *ngIf="dataSource.showNoDataMessage$ | async" class="no-data-message">
     {{ noDataMessage }}
   </div>
-  <mat-paginator
-    [length]="dataCount"
-    [pageSizeOptions]="pageSizeOptions"
-    showFirstLastButtons
-  ></mat-paginator>
+  <mat-paginator [length]="dataCount" [pageSizeOptions]="pageSizeOptions" showFirstLastButtons></mat-paginator>
 </div>

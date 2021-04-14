@@ -2,7 +2,7 @@ import { Component, CUSTOM_ELEMENTS_SCHEMA, OnInit, TemplateRef, ViewChild } fro
 import { HarnessLoader, parallel } from '@angular/cdk/testing';
 import { TestbedHarnessEnvironment } from '@angular/cdk/testing/testbed';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ColumnType, CustomTemplateEmitData, GridConfig } from '../models';
+import { ColumnType, GridConfig } from '../models';
 
 import { CustomDataGridComponent } from './custom-data-grid.component';
 import { MatTableModule } from '@angular/material/table';
@@ -29,11 +29,10 @@ import { MatPaginatorHarness } from '@angular/material/paginator/testing';
       [gridConfig]="gridConfig"
       [displayedColumns]="columns"
       [dataSource]="mockData"
-      (customTemplateClick)="onCustomTemplateClick($event)"
     ></app-custom-data-grid>
 
-    <ng-template #actionsTemplate let-data="rowData" let-clickHandler="clickEventHandler">
-      <button mat-button (click)="clickHandler({ column: 'actions', rowData: data })">Action</button>
+    <ng-template #actionsTemplate let-rowData>
+      <button mat-button (click)="onActionClick(rowData)">Action</button>
     </ng-template>
   `
 })
@@ -41,9 +40,9 @@ class TestWrapperComponent implements OnInit {
   @ViewChild('actionsTemplate', { static: true })
   actionsTemplate!: TemplateRef<any>;
   gridConfig!: GridConfig[];
-  mockData = new CustomDataSource<any>();
+  mockData: any[] = [{ id: 1 }];
   columns: string[] = ['actions'];
-  emittedData!: CustomTemplateEmitData;
+  clickedRowData!: any;
 
   ngOnInit(): void {
     this.gridConfig = [
@@ -54,11 +53,10 @@ class TestWrapperComponent implements OnInit {
         customTemplate: this.actionsTemplate
       }
     ];
-    this.mockData.setDataSubject([{ id: 1 }]);
   }
 
-  onCustomTemplateClick(data: CustomTemplateEmitData): void {
-    this.emittedData = data;
+  onActionClick(data: any): void {
+    this.clickedRowData = data;
   }
 }
 
@@ -94,13 +92,12 @@ describe('CustomDataGridComponent - TestWrapperComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should test customTemplateClick output event', async () => {
+  it('should test customTemplate', async () => {
     const table = await loader.getHarness(MatTableHarness);
     const actionBtn = await table.getHarness(MatButtonHarness);
-    expect(component.emittedData).toBeUndefined();
+    expect(component.clickedRowData).toBeUndefined();
     await actionBtn.click();
-    expect(component.emittedData?.column).toEqual('actions');
-    expect(component.emittedData?.rowData).toEqual({ id: 1 });
+    expect(component.clickedRowData).toEqual({ id: 1 });
   });
 });
 

@@ -4,7 +4,7 @@ import { MatSelectChange } from '@angular/material/select';
 import { MatSort, Sort } from '@angular/material/sort';
 import { fromEvent, merge } from 'rxjs';
 import { debounceTime, distinctUntilChanged, filter, map } from 'rxjs/operators';
-import { ColumnType, CustomTemplateEmitData, GridConfig } from '../models';
+import { ColumnType, GridConfig } from '../models';
 import { CustomDataSource } from './custom-datasource';
 
 @Component({
@@ -77,14 +77,6 @@ export class CustomDataGridComponent implements OnInit, AfterViewInit {
   @Output() selectionChange: EventEmitter<any> = new EventEmitter<any>();
 
   /**
-   * Event emitted when any one of the custom template's element in the grid has been clicked by the user
-   * if it is binding to click event.
-   * Emits the clicked row data.
-   */
-  @Output()
-  customTemplateClick: EventEmitter<CustomTemplateEmitData> = new EventEmitter<CustomTemplateEmitData>();
-
-  /**
    * Event emitted when the user sorts a column or change page size or index,
    * Emits appropriate event.
    */
@@ -149,14 +141,6 @@ export class CustomDataGridComponent implements OnInit, AfterViewInit {
    */
   emitClickedElement(element: any): void {
     this.linkClick.emit(element);
-  }
-
-  /**
-   * Emits an object of type CustomTemplateEmitData.
-   * @param data object of type CustomTemplateEmitData
-   */
-  emitClickedElementForCustomTemplate(data: CustomTemplateEmitData): void {
-    this.customTemplateClick.emit(data);
   }
 
   /**

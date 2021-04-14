@@ -10,7 +10,7 @@ export const getEmployees = (req: Request, res: Response) => {
   if (filter) {
     // Filters by name
     employees = employees.filter(
-      (emp) =>
+      emp =>
         emp.name
           .trim()
           .toLowerCase()
@@ -39,13 +39,11 @@ export const getEmployees = (req: Request, res: Response) => {
       break;
   }
 
-  const initialPos =
-    ((pageNumber as unknown) as number) * ((pageSize as unknown) as number);
+  const initialPos: number = Number(pageNumber) * Number(pageSize);
 
-  const employeesPage = employees.slice(
-    initialPos,
-    initialPos + ((pageSize as unknown) as number)
-  );
+  const employeesPage = employees.slice(initialPos, initialPos + Number(pageSize));
+  console.log('initialPos, pageSize', initialPos, pageSize);
+  console.log('initialPos + ((pageSize as unknown) as number)', initialPos + Number(pageSize));
 
   setTimeout(() => {
     res.status(200).json({ data: employeesPage, dataCount });
@@ -53,11 +51,7 @@ export const getEmployees = (req: Request, res: Response) => {
   }, 1000);
 };
 
-const sortArray = (
-  array: any[],
-  property: string,
-  direction: number = 1
-): any[] => {
+const sortArray = (array: any[], property: string, direction: number = 1): any[] => {
   if (array) {
     array.sort((a, b) => {
       let av = a[property];
