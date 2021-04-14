@@ -88,7 +88,7 @@ export class CustomDataGridComponent implements OnInit, OnChanges {
   /** Reference to the MatSort. */
   @ViewChild(MatSort, { static: true }) sort!: MatSort;
 
-  gridDataSource!: MatTableDataSource<any>;
+  gridDataSource: MatTableDataSource<any>;
   tableScrollStyle!: {};
   private sortState!: Sort;
 
@@ -96,7 +96,9 @@ export class CustomDataGridComponent implements OnInit, OnChanges {
     return ColumnType;
   }
 
-  constructor(private datePipe: DatePipe) {}
+  constructor(private datePipe: DatePipe) {
+    this.gridDataSource = new MatTableDataSource();
+  }
 
   ngOnInit(): void {
     if (this.requirePagination) {
@@ -126,7 +128,7 @@ export class CustomDataGridComponent implements OnInit, OnChanges {
       this.sort.direction = this.sortState.direction;
     }
     if (changes.dataSource && changes.dataSource.currentValue) {
-      this.gridDataSource = new MatTableDataSource(this.dataSource);
+      this.gridDataSource.data = this.dataSource;
       this.gridDataSource.sort = this.sort;
       if (this.sortState) {
         this.sort.sortChange.emit(this.sortState);
