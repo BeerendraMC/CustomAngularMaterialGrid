@@ -55,7 +55,7 @@ export class CustomDataGridComponent implements OnInit, OnChanges {
    * The message to be displayed when there is no data.
    * Defaults to 'N/A'.
    */
-  @Input() noDataMessage = 'N/A';
+  @Input() noDataMessage = 'No data available.';
 
   /**
    * The flag to turn pagination on or off.
