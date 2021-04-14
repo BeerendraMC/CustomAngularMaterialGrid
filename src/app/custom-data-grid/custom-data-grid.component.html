@@ -1,5 +1,5 @@
 <div class="mat-elevation-z8">
-  <mat-form-field class="search-field" *ngIf="searchOption" [ngStyle]="searchOption?.searchBoxStyle || null">
+  <mat-form-field class="search-field" *ngIf="searchOption" [ngStyle]="searchOption?.searchBoxStyle!">
     <mat-label>{{ searchOption?.searchTextBoxLabel }}</mat-label>
     <input matInput (keyup)="applyFilter($event)" autocomplete="off" />
     <mat-icon matPrefix>search</mat-icon>
@@ -92,13 +92,7 @@
             }"
           >
             <ng-container
-              *ngTemplateOutlet="
-                column.customTemplate || null;
-                context: {
-                  rowData: element,
-                  clickEventHandler: this.emitClickedElementForCustomTemplate.bind(this)
-                }
-              "
+              *ngTemplateOutlet="column.customTemplate || null; context: { $implicit: element }"
             ></ng-container>
           </div>
         </td>

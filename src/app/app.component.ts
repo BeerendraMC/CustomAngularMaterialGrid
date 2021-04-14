@@ -1,5 +1,5 @@
 import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
-import { GridConfig, ColumnType, CustomTemplateEmitData } from './models/custom-data-grid';
+import { GridConfig, ColumnType } from './models/custom-data-grid';
 import { EmployeeService } from './employee.service';
 import { IEmployee } from './models';
 
@@ -13,7 +13,7 @@ export class AppComponent implements OnInit {
   displayedColumns!: string[];
   Employees!: IEmployee[];
   selectedEmployee!: IEmployee;
-  GenderChangeData: any;
+  genderChangeData: any;
   clickedEmployee!: IEmployee;
   customTemplateColumn!: string;
 
@@ -134,19 +134,16 @@ export class AppComponent implements OnInit {
   }
 
   onGenderChange(data: any): void {
-    this.GenderChangeData = data;
+    this.genderChangeData = data;
   }
 
-  onCustomTemplateClick(data: CustomTemplateEmitData): void {
-    switch (data.column) {
-      case 'homeTown':
-        this.customTemplateColumn = 'homeTown';
-        this.clickedEmployee = data.rowData as IEmployee;
-        break;
-      case 'action':
-        this.customTemplateColumn = 'action';
-        this.clickedEmployee = data.rowData as IEmployee;
-        break;
-    }
+  onHomeTownClick(data: IEmployee): void {
+    this.customTemplateColumn = 'homeTown';
+    this.clickedEmployee = data;
+  }
+
+  onActionClick(data: IEmployee): void {
+    this.customTemplateColumn = 'action';
+    this.clickedEmployee = data;
   }
 }

@@ -1,10 +1,10 @@
-import { Component, OnInit, OnChanges, Input, ViewChild, Output, EventEmitter } from '@angular/core';
+import { Component, OnChanges, Input, ViewChild, Output, EventEmitter, SimpleChanges, OnInit } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { MatSort, Sort, SortDirection } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSelectChange } from '@angular/material/select';
-import { ColumnType, CustomTemplateEmitData, GridConfig } from '../models';
+import { ColumnType, GridConfig } from '../models';
 
 /**
  * A configurable and re-usable grid component built on Angular Material data table
@@ -82,15 +82,8 @@ export class CustomDataGridComponent implements OnInit, OnChanges {
    */
   @Output() selectionChange: EventEmitter<any> = new EventEmitter<any>();
 
-  /**
-   * Event emitted when any one of the custom template's element in the grid has been clicked by the user
-   * if it is binding to click event.
-   * Emits the clicked row data.
-   */
-  @Output() customTemplateClick: EventEmitter<any> = new EventEmitter<any>();
-
   /** Reference to the MatPaginator. */
-  @ViewChild(MatPaginator, { static: false }) paginator!: MatPaginator;
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
 
   /** Reference to the MatSort. */
   @ViewChild(MatSort, { static: true }) sort!: MatSort;
@@ -106,7 +99,25 @@ export class CustomDataGridComponent implements OnInit, OnChanges {
   constructor(private datePipe: DatePipe) {}
 
   ngOnInit(): void {
-    if (this.defaultSortColumn) {
+    if (this.requirePagination) {
+      // If the user changes the sort order, reset back to the first page.
+      this.sort.sortChange.subscribe(() => (this.paginator.pageIndex = 0));
+    }
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (
+      changes.verticalScrollOffsetInRows &&
+      changes.verticalScrollOffsetInRows.firstChange &&
+      this.verticalScrollOffsetInRows
+    ) {
+      const maxHeight = 56 * (this.verticalScrollOffsetInRows + 1);
+      this.tableScrollStyle = {
+        'max-height': `${maxHeight}px`,
+        'overflow-y': 'auto'
+      };
+    }
+    if (changes.defaultSortColumn && changes.defaultSortColumn.firstChange && this.defaultSortColumn) {
       this.sortState = {
         active: this.defaultSortColumn.name,
         direction: this.defaultSortColumn.sortDirection
@@ -114,26 +125,15 @@ export class CustomDataGridComponent implements OnInit, OnChanges {
       this.sort.active = this.sortState.active;
       this.sort.direction = this.sortState.direction;
     }
-    if (this.verticalScrollOffsetInRows) {
-      const maxHeight = 56 * (this.verticalScrollOffsetInRows + 1);
-      this.tableScrollStyle = {
-        'max-height': `${maxHeight}px`,
-        'overflow-y': 'auto'
-      };
-    }
-    if (this.requirePagination) {
-      // If the user changes the sort order, reset back to the first page.
-      this.sort.sortChange.subscribe(() => (this.paginator.pageIndex = 0));
-    }
-  }
-
-  ngOnChanges(): void {
-    if (this.dataSource) {
+    if (changes.dataSource && changes.dataSource.currentValue) {
       this.gridDataSource = new MatTableDataSource(this.dataSource);
+      this.gridDataSource.sort = this.sort;
+      if (this.sortState) {
+        this.sort.sortChange.emit(this.sortState);
+      }
       if (this.requirePagination) {
         this.gridDataSource.paginator = this.paginator;
       }
-      this.gridDataSource.sort = this.sort;
       this.gridDataSource.sortingDataAccessor = (data: any, property: string) => {
         if (!data[property]) {
           return null;
@@ -146,9 +146,6 @@ export class CustomDataGridComponent implements OnInit, OnChanges {
         }
         return data[property];
       };
-      if (this.sortState) {
-        this.sort.sortChange.emit(this.sortState);
-      }
       if (this.searchOption) {
         this.gridDataSource.filterPredicate =
           this.searchOption.onColumn === 'globalFilter'
@@ -177,14 +174,6 @@ export class CustomDataGridComponent implements OnInit, OnChanges {
    */
   emitClickedElement(element: any): void {
     this.linkClick.emit(element);
-  }
-
-  /**
-   * Emits an object of type CustomTemplateEmitData.
-   * @param data object of type CustomTemplateEmitData
-   */
-  emitClickedElementForCustomTemplate(data: CustomTemplateEmitData): void {
-    this.customTemplateClick.emit(data);
   }
 
   /**

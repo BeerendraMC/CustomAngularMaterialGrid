@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { Component, CUSTOM_ELEMENTS_SCHEMA, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { Component, CUSTOM_ELEMENTS_SCHEMA, OnInit, SimpleChange, TemplateRef, ViewChild } from '@angular/core';
 import { ComponentFixture, inject, TestBed } from '@angular/core/testing';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatTableModule } from '@angular/material/table';
@@ -19,7 +19,7 @@ import { TestbedHarnessEnvironment } from '@angular/cdk/testing/testbed';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
 
-import { ColumnType, CustomTemplateEmitData, GridConfig } from '../models';
+import { ColumnType, GridConfig } from '../models';
 import { CustomDataGridComponent } from './custom-data-grid.component';
 
 @Component({
@@ -28,11 +28,10 @@ import { CustomDataGridComponent } from './custom-data-grid.component';
       [gridConfig]="gridConfig"
       [displayedColumns]="columns"
       [dataSource]="mockData"
-      (customTemplateClick)="onCustomTemplateClick($event)"
     ></app-custom-data-grid>
 
-    <ng-template #actionsTemplate let-data="rowData" let-clickHandler="clickEventHandler">
-      <button mat-button (click)="clickHandler({ column: 'actions', rowData: data })">Action</button>
+    <ng-template #actionsTemplate let-rowData>
+      <button mat-button (click)="onActionClick(rowData)">Action</button>
     </ng-template>
   `
 })
@@ -42,7 +41,7 @@ class TestWrapperComponent implements OnInit {
   gridConfig!: GridConfig[];
   mockData: any[] = [{ id: 1 }];
   columns: string[] = ['actions'];
-  emittedData!: CustomTemplateEmitData;
+  clickedRowData!: any;
 
   ngOnInit(): void {
     this.gridConfig = [
@@ -55,8 +54,8 @@ class TestWrapperComponent implements OnInit {
     ];
   }
 
-  onCustomTemplateClick(data: CustomTemplateEmitData): void {
-    this.emittedData = data;
+  onActionClick(data: any): void {
+    this.clickedRowData = data;
   }
 }
 
@@ -92,13 +91,12 @@ describe('CustomDataGridComponent - TestWrapperComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should test customTemplateClick output event', async () => {
+  it('should test customTemplate', async () => {
     const table = await loader.getHarness(MatTableHarness);
     const actionBtn = await table.getHarness(MatButtonHarness);
-    expect(component.emittedData).toBeUndefined();
+    expect(component.clickedRowData).toBeUndefined();
     await actionBtn.click();
-    expect(component.emittedData?.column).toEqual('actions');
-    expect(component.emittedData?.rowData).toEqual({ id: 1 });
+    expect(component.clickedRowData).toEqual({ id: 1 });
   });
 });
 
@@ -158,7 +156,12 @@ describe('CustomDataGridComponent', () => {
     component.verticalScrollOffsetInRows = 1;
     component.requirePagination = false;
     component.ngOnInit();
-    component.ngOnChanges();
+    component.ngOnChanges({
+      defaultSortColumn: new SimpleChange(null, { name: 'name', sortDirection: 'desc' }, true),
+      verticalScrollOffsetInRows: new SimpleChange(null, 1, true),
+      requirePagination: new SimpleChange(null, false, true),
+      dataSource: new SimpleChange(null, mockGridData, true)
+    });
     await fixture.whenStable();
     const table = await loader.getHarness(MatTableHarness);
     const rows = await table.getRows();
@@ -179,7 +182,9 @@ describe('CustomDataGridComponent', () => {
   it('should test noDataMessage input properties', async () => {
     component.noDataMessage = 'No data available';
     component.dataSource = [];
-    component.ngOnChanges();
+    component.ngOnChanges({
+      dataSource: new SimpleChange(null, [], true)
+    });
     fixture.detectChanges();
     await fixture.whenStable();
     const msgDiv = document.querySelector('.no-data-message') as HTMLElement;
@@ -194,7 +199,9 @@ describe('CustomDataGridComponent', () => {
       onColumn: 'name',
       searchTextBoxLabel: 'Search by name'
     };
-    component.ngOnChanges();
+    component.ngOnChanges({
+      dataSource: new SimpleChange(null, mockGridData, true)
+    });
     const formField = await loader.getHarness(MatFormFieldHarness.with({ selector: '.search-field' }));
     const searchInput = await formField.getControl(MatInputHarness);
     expect(await formField.getLabel()).toEqual('Search by name');
@@ -214,19 +221,21 @@ describe('CustomDataGridComponent', () => {
     component.gridConfig = mockGridConfiguration.map((x, i) => {
       return i === 1 ? { ...x, columnType: ColumnType.LinkAndDescription } : { ...x };
     });
-    component.dataSource = mockGridData.map(x => ({
+    const mockData = (component.dataSource = mockGridData.map(x => ({
       ...x,
       name: {
         Link: x.name,
         Description: 'dummy description',
         SearchSortField: 'Link'
       }
-    }));
+    })));
     component.searchOption = {
       onColumn: 'name',
       searchTextBoxLabel: 'Search by name'
     };
-    component.ngOnChanges();
+    component.ngOnChanges({
+      dataSource: new SimpleChange(null, mockData, true)
+    });
     const formField = await loader.getHarness(MatFormFieldHarness.with({ selector: '.search-field' }));
     const searchInput = await formField.getControl(MatInputHarness);
     expect(await formField.getLabel()).toEqual('Search by name');
@@ -249,15 +258,17 @@ describe('CustomDataGridComponent', () => {
       }
     ];
     component.displayedColumns = [...mockDisplayedColumns, 'dob'];
-    component.dataSource = mockGridData.map((x, i) => ({
+    const mockData = (component.dataSource = mockGridData.map((x, i) => ({
       ...x,
       dob: i === 0 ? new Date('1997/11/06') : new Date('1996/03/08')
-    }));
+    })));
     component.searchOption = {
       onColumn: 'dob',
       searchTextBoxLabel: 'Search by dob'
     };
-    component.ngOnChanges();
+    component.ngOnChanges({
+      dataSource: new SimpleChange(null, mockData, true)
+    });
     const formField = await loader.getHarness(MatFormFieldHarness.with({ selector: '.search-field' }));
     const searchInput = await formField.getControl(MatInputHarness);
     expect(await formField.getLabel()).toEqual('Search by dob');
@@ -276,11 +287,13 @@ describe('CustomDataGridComponent', () => {
       onTwoColumns: ['name', 'gender'],
       searchTextBoxLabel: 'Search by name or gender'
     };
-    component.dataSource = mockGridData.map((x, i) => ({
+    const mockData = (component.dataSource = mockGridData.map((x, i) => ({
       ...x,
       gender: i === 0 ? 'male' : 'female'
-    }));
-    component.ngOnChanges();
+    })));
+    component.ngOnChanges({
+      dataSource: new SimpleChange(null, mockData, true)
+    });
     const formField = await loader.getHarness(MatFormFieldHarness.with({ selector: '.search-field' }));
     const searchInput = await formField.getControl(MatInputHarness);
     expect(await formField.getLabel()).toEqual('Search by name or gender');
@@ -310,16 +323,18 @@ describe('CustomDataGridComponent', () => {
         { name: 'dob', label: 'DOB', columnType: ColumnType.Date },
         { name: 'doj', label: 'DOJ', columnType: ColumnType.Date }
       ];
-      component.dataSource = [
+      const mockData = (component.dataSource = [
         { dob: new Date('1997/11/06'), doj: new Date('2018/06/13') },
         { dob: new Date('1996/03/08'), doj: new Date('2019/11/10') }
-      ];
+      ]);
       component.displayedColumns = ['dob', 'doj'];
       component.searchOption = {
         onTwoColumns: ['dob', 'doj'],
         searchTextBoxLabel: 'Search by dob or doj'
       };
-      component.ngOnChanges();
+      component.ngOnChanges({
+        dataSource: new SimpleChange(null, mockData, true)
+      });
       const formField = await loader.getHarness(MatFormFieldHarness.with({ selector: '.search-field' }));
       const searchInput = await formField.getControl(MatInputHarness);
       expect(await formField.getLabel()).toEqual('Search by dob or doj');
@@ -360,7 +375,7 @@ describe('CustomDataGridComponent', () => {
         columnType: ColumnType.LinkAndDescription
       }
     ];
-    component.dataSource = [
+    const mockData = (component.dataSource = [
       {
         name: {
           Link: 'Beerendra',
@@ -381,13 +396,15 @@ describe('CustomDataGridComponent', () => {
           SearchSortField: 'Link'
         }
       }
-    ];
+    ]);
     component.displayedColumns = ['name', 'designation'];
     component.searchOption = {
       onTwoColumns: ['name', 'designation'],
       searchTextBoxLabel: 'Search by name or designation'
     };
-    component.ngOnChanges();
+    component.ngOnChanges({
+      dataSource: new SimpleChange(null, mockData, true)
+    });
     const formField = await loader.getHarness(MatFormFieldHarness.with({ selector: '.search-field' }));
     const searchInput = await formField.getControl(MatInputHarness);
     expect(await formField.getLabel()).toEqual('Search by name or designation');
@@ -413,7 +430,9 @@ describe('CustomDataGridComponent', () => {
       onColumn: 'globalFilter',
       searchTextBoxLabel: 'Global search'
     };
-    component.ngOnChanges();
+    component.ngOnChanges({
+      dataSource: new SimpleChange(null, mockGridData, true)
+    });
     const formField = await loader.getHarness(MatFormFieldHarness.with({ selector: '.search-field' }));
     const searchInput = await formField.getControl(MatInputHarness);
     expect(await formField.getLabel()).toEqual('Global search');
@@ -448,7 +467,7 @@ describe('CustomDataGridComponent', () => {
       }
     ];
     component.displayedColumns = [...mockDisplayedColumns, 'dob'];
-    component.dataSource = [
+    const mockData = (component.dataSource = [
       ...mockGridData.map((x, i) => ({
         ...x,
         name: {
@@ -464,12 +483,14 @@ describe('CustomDataGridComponent', () => {
         gender: null,
         dob: null
       }
-    ];
+    ]);
     component.searchOption = {
       onColumn: 'globalFilter',
       searchTextBoxLabel: 'Global search'
     };
-    component.ngOnChanges();
+    component.ngOnChanges({
+      dataSource: new SimpleChange(null, mockData, true)
+    });
     const formField = await loader.getHarness(MatFormFieldHarness.with({ selector: '.search-field' }));
     const searchInput = await formField.getControl(MatInputHarness);
     expect(await formField.getLabel()).toEqual('Global search');
@@ -498,12 +519,14 @@ describe('CustomDataGridComponent', () => {
   });
 
   it('should test search functionality on two columns when they have null values', async () => {
-    component.dataSource = [...mockGridData, { id: null, name: null, gender: null }];
+    const mockData = (component.dataSource = [...mockGridData, { id: null, name: null, gender: null }]);
     component.searchOption = {
       onTwoColumns: ['id', 'name'],
       searchTextBoxLabel: 'Search by id or name'
     };
-    component.ngOnChanges();
+    component.ngOnChanges({
+      dataSource: new SimpleChange(null, mockData, true)
+    });
     const formField = await loader.getHarness(MatFormFieldHarness.with({ selector: '.search-field' }));
     const searchInput = await formField.getControl(MatInputHarness);
     expect(await formField.getLabel()).toEqual('Search by id or name');
@@ -535,11 +558,13 @@ describe('CustomDataGridComponent', () => {
       }
     ];
     component.displayedColumns = [...mockDisplayedColumns, 'dob'];
-    component.dataSource = mockGridData.map((x, i) => ({
+    const mockData = (component.dataSource = mockGridData.map((x, i) => ({
       ...x,
       dob: i === 0 ? new Date('1997/11/06') : new Date('1996/03/08')
-    }));
-    component.ngOnChanges();
+    })));
+    component.ngOnChanges({
+      dataSource: new SimpleChange(null, mockData, true)
+    });
     const sort = await loader.getHarness(MatSortHarness);
     const sortHeader = (await sort.getSortHeaders())[3];
     await sortHeader.click();
@@ -555,15 +580,17 @@ describe('CustomDataGridComponent', () => {
     component.gridConfig = mockGridConfiguration.map((x, i) => {
       return i === 1 ? { ...x, columnType: ColumnType.LinkAndDescription, sort: true } : { ...x };
     });
-    component.dataSource = mockGridData.map(x => ({
+    const mockData = (component.dataSource = mockGridData.map(x => ({
       ...x,
       name: {
         Link: x.name,
         Description: 'dummy description',
         SearchSortField: 'Link'
       }
-    }));
-    component.ngOnChanges();
+    })));
+    component.ngOnChanges({
+      dataSource: new SimpleChange(null, mockData, true)
+    });
     const sort = await loader.getHarness(MatSortHarness);
     const sortHeader = (await sort.getSortHeaders())[1];
     await sortHeader.click();
@@ -576,8 +603,10 @@ describe('CustomDataGridComponent', () => {
   });
 
   it('should test sort functionality on column having null value', async () => {
-    component.dataSource = [...mockGridData, { id: null, name: null, gender: null }];
-    component.ngOnChanges();
+    const mockData = (component.dataSource = [...mockGridData, { id: null, name: null, gender: null }]);
+    component.ngOnChanges({
+      dataSource: new SimpleChange(null, mockData, true)
+    });
     const sort = await loader.getHarness(MatSortHarness);
     const sortHeader = (await sort.getSortHeaders())[1];
     await sortHeader.click();
@@ -589,7 +618,9 @@ describe('CustomDataGridComponent', () => {
   });
 
   it('should test the table', async () => {
-    component.ngOnChanges();
+    component.ngOnChanges({
+      dataSource: new SimpleChange(null, mockGridData, true)
+    });
     const table = await loader.getHarness(MatTableHarness);
     const headerRows = await table.getHeaderRows();
     const rows = await table.getRows();
@@ -614,7 +645,9 @@ describe('CustomDataGridComponent', () => {
   });
 
   it('should test linkClick output event', async () => {
-    component.ngOnChanges();
+    component.ngOnChanges({
+      dataSource: new SimpleChange(null, mockGridData, true)
+    });
     fixture.detectChanges();
     await fixture.whenStable();
     component.linkClick.subscribe((rowData: any) => {
@@ -626,7 +659,9 @@ describe('CustomDataGridComponent', () => {
   });
 
   it('should test selectionChange output event', async () => {
-    component.ngOnChanges();
+    component.ngOnChanges({
+      dataSource: new SimpleChange(null, mockGridData, true)
+    });
     component.selectionChange.subscribe((data: any) => {
       expect(data?.element).toBe(mockGridData[0]);
       expect(data?.selectedValue).toBe('female');
@@ -641,11 +676,15 @@ describe('CustomDataGridComponent', () => {
     expect(component.isStickyHeader()).toBeFalse();
     component.verticalScrollOffsetInRows = 1;
     component.requirePagination = false;
-    component.ngOnChanges();
+    component.ngOnChanges({
+      dataSource: new SimpleChange(null, mockGridData, true)
+    });
     expect(component.isStickyHeader()).toBeTrue();
 
     component.requirePagination = true;
-    component.ngOnChanges();
+    component.ngOnChanges({
+      dataSource: new SimpleChange(null, mockGridData, true)
+    });
     expect(component.isStickyHeader()).toBeTrue();
   });
 
