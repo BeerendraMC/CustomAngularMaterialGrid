@@ -130,9 +130,6 @@ export class CustomDataGridComponent implements OnInit, OnChanges {
     if (changes.dataSource && changes.dataSource.currentValue) {
       this.gridDataSource.data = this.dataSource;
       this.gridDataSource.sort = this.sort;
-      if (this.sortState) {
-        this.sort.sortChange.emit(this.sortState);
-      }
       if (this.requirePagination) {
         this.gridDataSource.paginator = this.paginator;
       }
@@ -148,6 +145,9 @@ export class CustomDataGridComponent implements OnInit, OnChanges {
         }
         return data[property];
       };
+      if (this.sortState) {
+        this.sort.sortChange.emit(this.sortState);
+      }
       if (this.searchOption) {
         this.gridDataSource.filterPredicate =
           this.searchOption.onColumn === 'globalFilter'
