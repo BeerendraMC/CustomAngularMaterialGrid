@@ -134,3 +134,4 @@ gridConfiguration: GridConfig[] = [
 - Custom CSS (column level).
 - Spinner (while fetching data from the api).
 - Configurable message to display when there is no data (defaults to ‘No data available.’)
+- Freezing first and last columns for mobile devices (screens < 1024px width) and introduce horizontal scroll bar.
